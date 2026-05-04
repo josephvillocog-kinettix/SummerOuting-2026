@@ -96,126 +96,7 @@ const GENDERS: Gender[] = ['Male', 'Female', 'Other'];
 const CATEGORIES: Category[] = ['Standard', 'Supervisor'];
 
 export default function App() {
-  const [players, setPlayers] = useState<Player[]>(() => {
-    const rawData = `"Jason Mondejar, M, Albert Mamac"
-"Marvin Keith Tan, M, Albert Mamac"
-"Adrian Merck Trapa, M, Albert Mamac"
-"Liz Melene Dayonot, F, Bob Supinger"
-"Teresa Patiluna, F, Bob Supinger"
-"Mary Louise Duaban, F, Ella Sharmine Buctuan"
-"Mary Claire Lozada, F, Ella Sharmine Buctuan"
-"Crystel Mae Pontino, F, Ella Sharmine Buctuan"
-"WhiteMillen Ponsica, F, Ella Sharmine Buctuan"
-"Carmel Grace Basalo, F, Ella Sharmine Buctuan"
-"Ella Sharmine Buctuan, F, Jeff Stine"
-"Mil Matthew Malinao, M, Lawrence Prado"
-"Margaux Kylie Cañete, F, Lawrence Prado"
-"Leobelle Joseph Villocog, M, Lawrence Prado"
-"Neil Joshua Paradero, M, Liz Melene"
-"Ariel Tabacolde, M, Liz Melene"
-"Jennelyn Oporto, F, Liz Melene"
-"Fionah Sophia Monisit, F, Liz Melene"
-"Paulo Lee Longkines, M, Rich Humprey"
-"Clarisse Sabdao, F, Rich Humprey"
-"Wilberth Baquial, M, Rich Humprey"
-"Riffy Campo, F, Robert Schwieterman"
-"Catherine Ballena, F, Robert Schwieterman"
-"Kein Negre, M, Shawn Fields"
-"Anna Shyn Silva, F, Teresa Patiluna"
-"Reina Lumayaga Bayhon, F, Teresa Patiluna"
-"Venus Lucaban, F, Teresa Patiluna"
-"Keziah Martinez, F, Bob Supinger"
-"Godspeed Guinto, M, Duane Jimenez"
-"Janrinpaul Semblante, M, Duane Jimenez"
-"Dansel Anthony Piamonte, M, Duane Jimenez"
-"Neil Mir Dionson, M, Janine Tampon"
-"Rosemarie Edullantes, F, Janine Tampon"
-"Rica Mae Manghihilot, F, Janine Tampon"
-"Jules Edward Medalla, M, Janine Tampon"
-"Allina Isabella Santiago, F, Janine Tampon"
-"Marijun Galo Palacao, M, Jelly Rios"
-"Jenn Claire Gestole, F, Jelly Rios"
-"Kenneth Itang, M, Jelly Rios"
-"Angelito Oclarit, M, Keziah Martinez"
-"Julianne Haj Espinosa, M, Keziah Martinez"
-"Saada Limba, F, Keziah Martinez"
-"Jelly Rios, F, Keziah Martinez"
-"Chaira Victoria Juarez, F, Keziah Martinez"
-"Ryle Justin Maturan, M, Keziah Martinez"
-"Joseph Cabahug, M, Keziah Martinez"
-"Chester Fred Jalalon, M, Keziah Martinez"
-"Angelou Simbahon, F, Keziah Martinez"
-"Nestor Tan Dunque, M, Keziah Martinez"
-"Ken Larren Amarillo, M, Keziah Martinez"
-"Martine Kyle Torres, M, Keziah Martinez"
-"Therese Marianne Leyva, F, Keziah Matinez"
-"Marl Kelly Tampos, M, Rose Ann Gula"
-"Ferdilyn Omiter, F, Keziah Martinez"
-"Jonarc Vasquez, M, Ann Lesaca"
-"Marc Lynnard Baylon Santua, M, Ann Lesaca"
-"Ariel Quiapo Bernal, M, Ann Lesaca"
-"Jon Quirino, M, Ben Ong"
-"Irene Bregente, F, Ben Ong"
-"Glycah Talledo Estra, F, Eula Ofiasa"
-"Adrian Alegarbes, M, Eula Ofiasa"
-"Joey Gracci Kapili, M, Irene Bregente"
-"Rey Cajes, M, Irene Bregente"
-"Kurt Urdaneta, M, Irene Bregente"
-"Allen Aguanta, M, Irene Bregente"
-"Michellene Kyle Rivera, F, John Michael Araneta"
-"Christian Ignacius Navarro, M, John Michael Araneta"
-"Marck Benedict Balucan, M, John Michael Araneta"
-"Charlz Alexander Pineda, M, John Michael Araneta"
-"Randy Seriosa, M, John Michael Araneta"
-"Steven Dimagna-ong, M, John Michael Araneta"
-"Kenjie Nagano, M, John Michael Araneta"
-"Michael Amores, M, John Michael Araneta"
-"Almark Milan, M, John Michael Araneta"
-"Edrian Paul Bardago, M, John Micheal Araneta"
-"John Paul Tayon, M, Jon Quirino"
-"Silvester Mativo, M, Jon Quirino"
-"Josh Navarro, M, Jon Quirino"
-"Danijel Carlos, M, Jon Quirino"
-"James Lauron, F, Jon Quirino"
-"Neil Gelbolingo, M, Josh Navarro"
-"Lovely Raquel Caraquel, F, Josh Navarro"
-"Joseph Carlo Fuentes, M, Josh Navarro"
-"John Caryll Cometa, M, Josh Navarro"
-"Oneil Sario, M, Josh Navarro"
-"Bill Sebua, M, Josh Navarro"
-"Lloyd Clarence Maquiling, M, Josh Navarro"
-"Marc Wilson Longno, M, Josh Navarro"
-"John Michael Araneta, M, Kenneth Garces"
-"Eula Ofiasa, F, Kenneth Garces"
-"Ann Rea Lesaca, F, Kenneth Garces"
-"Benny Ong, M, Lance Carlton"
-"Cecilio Ramirez, M, Mike Snow"
-"Neil Ian Enriquez, M, Mike Snow"
-"Kevin Mabunay Sigue, M, Raymund Malapad"
-"Princess Grace Mondido, F, Raymund Malapad"
-"Klyde Elydom Etang, M, Silvester Mativo"
-"Jericho Flores, M, Silvester Mativo"`;
-    
-    return rawData.split('\n').map(line => {
-      const cleanLine = line.replace(/^"|"$/g, '');
-      const parts = cleanLine.split(',').map(p => p.trim());
-      const name = parts[0];
-      const genderStr = parts[1]?.toUpperCase() || '';
-      const supervisorName = parts[2] || '';
-      
-      let gender: Gender = 'Other';
-      if (genderStr === 'M' || genderStr === 'MALE') gender = 'Male';
-      else if (genderStr === 'F' || genderStr === 'FEMALE') gender = 'Female';
-      
-      return { 
-        id: crypto.randomUUID(), 
-        name: name || 'Unknown', 
-        gender, 
-        category: 'Standard' as Category,
-        supervisorName 
-      };
-    }).filter(p => p.name !== 'Unknown');
-  });
+  const [players, setPlayers] = useState<Player[]>([]);
   const [tribes, setTribes] = useState<Tribe[]>(() => {
     return Array.from({ length: 6 }).map((_, i) => ({
       id: crypto.randomUUID(),
@@ -229,51 +110,18 @@ export default function App() {
   const [rawPlayersInput, setRawPlayersInput] = useState('');
   const [revealSequence, setRevealSequence] = useState<Record<string, number>>({});
   const [revealedCount, setRevealedCount] = useState(0);
-  const [isLoadingSheet, setIsLoadingSheet] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
 
-  const APPS_SCRIPT_EXPORT_URL = 'https://script.google.com/macros/s/AKfycbzAN_zoCgd06XB1zpQKxlX2ViOgeOLgECTyTAiBnMReGwiYieuLEwx_mwgpHxwZy-F_/exec';
+  const [isMuted, setIsMuted] = useState(false);
 
-  // --- Logic: Tribe Generation ---
-  const fetchData = async () => {
-    setIsLoadingSheet(true);
-    setPlayers([]); // Clear current roster to ensure refresh
-    try {
-      const response = await fetch(`/api/roster?t=${Date.now()}`);
-      const data = await response.json();
+  const audio = useMemo(() => {
+    const a = new Audio('https://assets.mixkit.co/music/preview/mixkit-tribal-ritual-558.mp3');
+    a.loop = true;
+    return a;
+  }, []);
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch roster');
-      }
-      
-      if (Array.isArray(data)) {
-        const newPlayers: Player[] = data.map((p: any) => {
-          const genderStr = (p.gender || p.Gender || '').toUpperCase().trim();
-          let gender: Gender = 'Other';
-          if (genderStr === 'M' || genderStr === 'MALE') gender = 'Male';
-          else if (genderStr === 'F' || genderStr === 'FEMALE') gender = 'Female';
-
-          return {
-            id: crypto.randomUUID(),
-            name: p.name || p.Name || 'Unknown',
-            gender,
-            category: 'Standard' as Category,
-            supervisorName: p.supervisor || p.Supervisor || ''
-          };
-        }).filter(p => p.name && p.name !== 'Unknown');
-
-        if (newPlayers.length > 0) {
-          setPlayers(newPlayers);
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching sheet data:', error);
-      alert(error instanceof Error ? error.message : 'Unknown connection error');
-    } finally {
-      setIsLoadingSheet(false);
-    }
-  };
+  useEffect(() => {
+    audio.muted = isMuted;
+  }, [isMuted, audio]);
 
   const generateTribes = () => {
     if (tribes.length === 0 || players.length === 0) return;
@@ -327,16 +175,40 @@ export default function App() {
   // Reveal Timer effect
   useEffect(() => {
     if (currentView === 'teams' && Object.keys(revealSequence).length > 0) {
+      const total = Object.keys(revealSequence).length;
+      
+      if (revealedCount < total) {
+        // Play audio when reveal starts
+        audio.play().catch(e => console.warn("Audio play blocked:", e));
+      } else {
+        // Stop audio when reveal ends
+        const fadeOut = setInterval(() => {
+          if (audio.volume > 0.1) {
+            audio.volume -= 0.1;
+          } else {
+            audio.pause();
+            audio.volume = 1.0;
+            clearInterval(fadeOut);
+          }
+        }, 100);
+      }
+
       const interval = setInterval(() => {
         setRevealedCount(prev => {
-          if (prev < Object.keys(revealSequence).length) return prev + 1;
+          if (prev < total) return prev + 1;
           clearInterval(interval);
           return prev;
         });
       }, 600); // Reveal speed
-      return () => clearInterval(interval);
+      
+      return () => {
+        clearInterval(interval);
+      };
+    } else {
+      audio.pause();
+      audio.currentTime = 0;
     }
-  }, [currentView, revealSequence]);
+  }, [currentView, revealSequence, revealedCount, audio]);
 
   const movePlayer = (playerId: string, fromTribeId: string | null, toTribeId: string) => {
     setTribes(prev => prev.map(tribe => {
@@ -368,44 +240,6 @@ export default function App() {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Tribes");
     XLSX.writeFile(workbook, "Survivor_Tribes.xlsx");
-  };
-
-  const handleSaveToSheet = async () => {
-    if (players.length === 0) return;
-    
-    setIsSaving(true);
-    setSaveSuccess(false);
-
-    try {
-      const dataToSync = tribes.flatMap(tribe => 
-        tribe.playerIds.map(pid => {
-          const p = players.find(player => player.id === pid);
-          return {
-            name: p?.name || 'Unknown',
-            tribe: tribe.name,
-            supervisor: p?.supervisorName || tribe.leader || 'Not Assigned'
-          };
-        })
-      );
-
-      // Using text/plain to stay within "safelisted" headers for NO-CORS as requested previously
-      await fetch(APPS_SCRIPT_EXPORT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: {
-          'Content-Type': 'text/plain',
-        },
-        body: JSON.stringify(dataToSync)
-      });
-      
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
-    } catch (error) {
-      console.error('Save error:', error);
-      alert('Failed to save to cloud. Please check your connection.');
-    } finally {
-      setIsSaving(false);
-    }
   };
 
   // --- Stats Data ---
@@ -489,6 +323,15 @@ export default function App() {
           <span className="font-display text-2xl text-torch-orange tracking-widest leading-none">KINETTIX SUMMER OUTING 2026</span>
           <span className="font-display text-sm text-stone-500 tracking-[0.3em]">OUTWIT • OUTPLAY • OUTLAST</span>
         </div>
+        
+        {/* Audio Toggle */}
+        <button 
+          onClick={() => setIsMuted(!isMuted)}
+          className="ml-4 p-2 bg-stone-800 rounded-full text-stone-400 hover:text-torch-orange transition-colors"
+          title={isMuted ? "Unmute Ritual Music" : "Mute Ritual Music"}
+        >
+          {isMuted ? <Wind size={20} /> : <Sun className="animate-spin-slow" size={20} />}
+        </button>
       </div>
       
       <div className="flex items-center gap-2 md:gap-4">
@@ -562,7 +405,7 @@ export default function App() {
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-torch-orange to-transparent" />
                 <div className="flex items-center justify-between mb-8">
                   <h2 className="tribal-header text-3xl flex items-center gap-3">
-                    <Skull className="text-stone-500" /> Prepare Tribes
+                    <Skull className="text-stone-500" /> Kinetttix Tribes
                   </h2>
                   <div className="flex items-center gap-3">
                     <div className="flex flex-col items-end">
@@ -655,12 +498,11 @@ export default function App() {
                 </div>
                 
                 <h2 className="tribal-header text-3xl mb-8 flex items-center gap-3">
-                  <Users className="text-stone-500" /> Castaway Roster
+                  <Users className="text-stone-500" /> Tribe Roster
                 </h2>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                   <div>
-                    <label className="block font-display text-stone-600 tracking-wider mb-2">MANIFEST INPUT</label>
                     <textarea 
                       placeholder="Enter names (e.g. John Doe, M, Supervisor)"
                       className="w-full h-48 px-4 py-3 bg-[#0c0a09] text-stone-300 rounded-xl border border-[#292524] focus:border-torch-orange focus:outline-none font-mono text-sm shadow-inner"
@@ -704,21 +546,10 @@ export default function App() {
                           }}
                           className="w-full py-4 bg-stone-800 border border-stone-700 text-stone-200 font-display text-lg lg:text-xl tracking-widest hover:bg-stone-700 hover:border-torch-orange transition-all flex items-center justify-center gap-3"
                         >
-                          <Plus size={24} className="text-torch-orange" /> BOARD THE SHIP
+                          <Plus size={24} className="text-torch-orange" /> ADD USER(S)
                         </button>
 
-                        <button 
-                          onClick={fetchData}
-                          disabled={isLoadingSheet}
-                          className="w-full py-3 bg-stone-900 border border-stone-700 text-torch-orange font-display text-base tracking-[0.2em] hover:bg-stone-800 hover:border-torch-orange transition-all flex items-center justify-center gap-3 disabled:opacity-50"
-                        >
-                          {isLoadingSheet ? (
-                            <Loader2 size={20} className="animate-spin" />
-                          ) : (
-                            <Cloud size={20} />
-                          )}
-                          {isLoadingSheet ? 'COMMUNING WITH CLOUD...' : 'FETCH ROSTER FROM CLOUD'}
-                        </button>
+
                       </div>
                   </div>
 
@@ -801,26 +632,6 @@ export default function App() {
                 </p>
 
                 <div className="mt-4 flex gap-4">
-                  <button 
-                    onClick={handleSaveToSheet}
-                    disabled={isSaving || revealedCount < Object.keys(revealSequence).length}
-                    className={cn(
-                      "px-8 py-3 rounded-full font-display tracking-widest text-sm flex items-center gap-3 transition-all",
-                      saveSuccess 
-                        ? "bg-emerald-600 text-white" 
-                        : "bg-stone-800 border border-stone-700 text-torch-orange hover:bg-stone-700 hover:border-torch-orange"
-                    )}
-                  >
-                    {isSaving ? (
-                      <Loader2 size={18} className="animate-spin" />
-                    ) : saveSuccess ? (
-                      <Check size={18} />
-                    ) : (
-                      <Cloud size={18} />
-                    )}
-                    {isSaving ? 'SYNCING DATA...' : saveSuccess ? 'ROSTER SAVED!' : 'SAVE ROSTER TO CLOUD'}
-                  </button>
-
                   <button 
                     onClick={exportToExcel}
                     disabled={revealedCount < Object.keys(revealSequence).length}
@@ -925,10 +736,7 @@ export default function App() {
                       </div>
 
                       <div className="flex-grow p-4 relative z-10">
-                         <div className={cn(
-                           "grid gap-2 relative",
-                           isFinished ? "grid-cols-3" : "grid-cols-2"
-                         )}>
+                         <div className="grid grid-cols-3 gap-2 relative">
                             <AnimatePresence mode="popLayout">
                               {tribe.playerIds.map(id => {
                                 const player = players.find(p => p.id === id);
