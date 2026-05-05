@@ -7,45 +7,57 @@
   --font-hand: "Shadows Into Light", cursive;
 
   --color-jungle-dark: #064e3b;
-  --color-jungle-light: #065f46;
+  --color-jungle-light: #16a34a;
   --color-torch-orange: #f97316;
-  --color-torch-red: #991b1b;
+  --color-torch-red: #e11d48;
+  --color-ocean-blue: #0ea5e9;
+  --color-lagoon: #2dd4bf;
+  --color-hibiscus: #fb7185;
   --color-sand: #fef3c7;
   --color-wood: #451a03;
 
   --animate-spin-slow: spin 8s linear infinite;
+  --animate-sway: sway 4s ease-in-out infinite;
 }
 
 @layer base {
   body {
-    @apply bg-[#0c0a09] text-stone-200;
+    @apply bg-[#042f2e] text-stone-100 min-h-screen relative;
+    background-image: 
+      radial-gradient(circle at 100% 0%, rgba(14, 165, 233, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 0% 100%, rgba(22, 163, 74, 0.1) 0%, transparent 50%),
+      url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 10 Q 30 10 30 30 Q 30 50 10 50 Q 0 30 10 10' fill='%2316a34a' fill-opacity='0.02'/%3E%3C/svg%3E");
+    background-attachment: fixed;
   }
 }
 
 @layer components {
   .survivor-card {
-    @apply bg-[#1c1917] border-2 border-[#44403c] rounded-lg shadow-[0_10px_30px_rgba(0,0,0,0.5)] relative overflow-hidden;
-    background-image: url("https://www.transparenttextures.com/patterns/dark-wood.png");
+    @apply bg-[#1c1917] border-4 border-[#44403c] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] relative overflow-hidden;
+    background-image: url("https://www.transparenttextures.com/patterns/wood-pattern.png");
+  }
+
+  .hawaiian-card {
+    @apply bg-stone-950/40 backdrop-blur-xl border-2 border-stone-800/50 rounded-[2.5rem] shadow-2xl relative overflow-hidden;
+    background-image: url("https://www.transparenttextures.com/patterns/pinstriped-suit.png");
+    background-opacity: 0.05;
   }
 
   .tribal-header {
     @apply font-display tracking-wider uppercase text-torch-orange drop-shadow-[0_2px_2px_rgba(0,0,0,1)];
   }
 
-  .torch-glow {
-    box-shadow: 0 0 20px rgba(249, 115, 22, 0.3);
+  .tropical-glow {
+    box-shadow: 0 0 30px rgba(45, 212, 191, 0.2);
   }
 
   .torch-flicker {
     animation: flicker 2s infinite;
   }
 
-  .tribal-pattern {
-    background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.05) 10px, rgba(0,0,0,0.05) 20px);
-  }
-
-  .tribal-border {
-    mask-image: linear-gradient(to right, black 80%, transparent), linear-gradient(to bottom, black 80%, transparent);
+  .polynesian-pattern {
+    background-image: url("https://www.transparenttextures.com/patterns/az-subtle.png");
+    opacity: 0.1;
   }
 
   @keyframes flicker {
@@ -53,5 +65,14 @@
     50% { opacity: 0.8; transform: scale(1.05); filter: blur(1px); }
     25% { opacity: 0.9; transform: scale(0.98); }
     75% { opacity: 0.85; transform: scale(1.02); }
+  }
+
+  @keyframes sway {
+    0%, 100% { transform: rotate(-3deg); }
+    50% { transform: rotate(3deg); }
+  }
+
+  .animate-sway {
+    animation: sway 4s ease-in-out infinite;
   }
 }

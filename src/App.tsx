@@ -29,6 +29,8 @@ import {
   Sun,
   Wind,
   Bird,
+  Waves,
+  Sprout as Flower,
   Mars,
   Venus,
   MoreHorizontal,
@@ -83,13 +85,13 @@ type View = 'teams' | 'compose' | 'roster' | 'outplay';
 
 // --- Constants ---
 const TRIBAL_COLORS = [
-  { name: 'Volcanic Red', value: '#991b1b' },
-  { name: 'Jungle Teal', value: '#0d9488' },
-  { name: 'Solar Orange', value: '#ea580c' },
-  { name: 'Lagoon Blue', value: '#0369a1' },
-  { name: 'Forest Green', value: '#14532d' },
-  { name: 'Bamboo Yellow', value: '#b45309' },
-  { name: 'Spirit Purple', value: '#7e22ce' },
+  { name: 'Hibiscus Red', value: '#e11d48' },
+  { name: 'Lagoon Blue', value: '#0ea5e9' },
+  { name: 'Jungle Lush', value: '#16a34a' },
+  { name: 'Sunrise Gold', value: '#f97316' },
+  { name: 'Orchid Flower', value: '#d946ef' },
+  { name: 'Sandy Beach', value: '#fde047' },
+  { name: 'Deep Reef', value: '#1e40af' },
 ];
 
 const GENDERS: Gender[] = ['Male', 'Female', 'Other'];
@@ -267,42 +269,78 @@ export default function App() {
     })).filter(d => d.value > 0);
   }, [players]);
 
-  // --- Components ---
+// --- Components ---
+
+  const KinettixLogo = ({ className, size = 40 }: { className?: string, size?: number }) => (
+    <svg 
+      width={size} 
+      height={size} 
+      viewBox="0 0 400 400" 
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M100 100 L200 200 L100 300 L50 250 L125 200 L50 150 Z" fill="#0ea5e9" />
+      <path d="M220 100 L320 100 L220 200 L170 150 Z" fill="#84cc16" />
+      <path d="M220 300 L320 300 L170 200 L220 250 Z" fill="#f97316" />
+    </svg>
+  );
 
   const TikiGuard = ({ color }: { color: string }) => (
-    <div className="relative w-24 h-40 flex flex-col items-center justify-end group">
+    <div className="relative w-28 h-44 flex flex-col items-center justify-end group">
       {/* Torch */}
-      <div className="absolute -top-4 -left-2 z-20">
-        <Flame className="w-8 h-8 text-torch-orange torch-flicker" />
-        <div className="w-1 h-12 bg-stone-800 mx-auto rounded-full mt-1" />
+      <div className="absolute -top-6 -left-3 z-20">
+        <Flame className="w-10 h-10 text-torch-orange torch-flicker filter drop-shadow-[0_0_10px_rgba(249,115,22,0.8)]" />
+        <div className="w-1.5 h-16 bg-[#451a03] mx-auto rounded-full mt-1 border-x border-stone-900" />
       </div>
       
-      {/* Head */}
-      <div className="w-16 h-20 bg-stone-800 rounded-t-2xl border-4 border-stone-900 flex flex-col items-center pt-3 gap-2 relative shadow-2xl">
-         <div className="absolute -top-3 w-20 flex justify-between px-1">
-            <Palmtree className="w-6 h-6 text-green-700 -rotate-12" />
-            <Palmtree className="w-6 h-6 text-green-700 rotate-12" />
+      {/* Decorative Leis/Flowers */}
+      <div className="absolute top-1/3 -right-6 z-30 animate-sway opacity-60">
+        <Flower className="w-8 h-8 text-hibiscus" />
+      </div>
+      <div className="absolute top-1/4 -left-6 z-30 animate-sway opacity-40 delay-1000">
+        <Flower className="w-6 h-6 text-lagoon" />
+      </div>
+
+      {/* Head - More Hawaiian Style */}
+      <div className="w-18 h-24 bg-stone-800 rounded-t-3xl border-4 border-stone-900 flex flex-col items-center pt-4 gap-2 relative shadow-2xl overflow-hidden">
+         {/* Tribal Markings */}
+         <div className="absolute top-0 w-full h-full opacity-10 pointer-events-none">
+            <div className="polynesian-pattern w-full h-full" />
          </div>
-         <div className="flex gap-4">
-            <div className="w-3 h-3 rounded-full bg-amber-400 animate-pulse shadow-[0_0_5px_rgba(251,191,36,0.8)]" />
-            <div className="w-3 h-3 rounded-full bg-amber-400 animate-pulse shadow-[0_0_5px_rgba(251,191,36,0.8)]" />
+         
+         <div className="absolute -top-3 w-24 flex justify-between px-1">
+            <Palmtree className="w-7 h-7 text-emerald-600 -rotate-12" />
+            <Palmtree className="w-7 h-7 text-emerald-600 rotate-12" />
          </div>
-         <div className="w-8 h-4 bg-stone-900 rounded-lg flex items-center justify-center">
-            <div className="w-6 h-1 bg-white/20 rounded-full" />
+         
+         {/* Glowing Eyes */}
+         <div className="flex gap-5 mt-1">
+            <div className="w-4 h-4 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_15px_rgba(34,211,238,0.9)]" />
+            <div className="w-4 h-4 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_15px_rgba(34,211,238,0.9)]" />
+         </div>
+         
+         {/* Large Mouth */}
+         <div className="w-10 h-6 bg-stone-950 rounded-b-xl border-t-2 border-stone-700 flex flex-col items-center justify-center overflow-hidden">
+            <div className="flex gap-0.5">
+               <div className="w-1 h-3 bg-stone-200/20" />
+               <div className="w-1 h-3 bg-stone-200/20" />
+               <div className="w-1 h-3 bg-stone-200/20" />
+            </div>
          </div>
       </div>
       
       {/* Body */}
-      <div className="w-14 h-16 bg-stone-800 border-x-4 border-b-4 border-stone-900 rounded-b-lg flex flex-col items-center p-2 relative">
-         <div className="absolute inset-0 flex items-center justify-center opacity-20">
-            <Shield size={24} style={{ color }} />
+      <div className="w-16 h-18 bg-stone-800 border-x-4 border-b-4 border-stone-900 rounded-b-xl flex flex-col items-center p-2 relative">
+         <div className="absolute inset-0 flex items-center justify-center opacity-30 mt-2">
+            <Shield size={28} style={{ color }} className="animate-pulse" />
          </div>
-         <div className="w-full h-1 bg-stone-700 rounded-full mt-2" />
-         <div className="w-full h-1 bg-stone-700 rounded-full mt-1" />
+         <div className="w-full h-1 bg-stone-700/50 rounded-full mt-2" />
+         <div className="w-full h-1 bg-stone-700/50 rounded-full mt-1" />
+         <div className="w-full h-1 bg-stone-700/50 rounded-full mt-1" />
       </div>
       
-      {/* Base */}
-      <div className="w-20 h-4 bg-stone-950 rounded-full blur-sm -mb-2 opacity-50" />
+      {/* Base/Shadow */}
+      <div className="w-24 h-6 bg-black rounded-full blur-md -mb-3 opacity-60" />
     </div>
   );
 
@@ -310,17 +348,17 @@ export default function App() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[#1c1917]/90 backdrop-blur-md border-b border-[#44403c] px-6 py-4 flex items-center justify-between shadow-2xl">
       <div className="flex items-center gap-3">
         <div className="relative">
-          <Flame className="w-10 h-10 text-torch-orange animate-pulse" />
+          <KinettixLogo size={48} className="animate-pulse drop-shadow-[0_0_10px_rgba(14,165,233,0.5)]" />
           <motion.div 
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="absolute -top-1 -right-1"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+            className="absolute -top-1 -right-1 opacity-20"
           >
-            <Shield className="w-4 h-4 text-amber-500" />
+             <Flower size={12} className="text-hibiscus" />
           </motion.div>
         </div>
         <div className="flex flex-col">
-          <span className="font-display text-2xl text-torch-orange tracking-widest leading-none">KINETTIX SUMMER OUTING 2026</span>
+          <span className="font-display text-2xl text-stone-100 tracking-widest leading-none">KINETTIX SUMMER OUTING 2026</span>
           <span className="font-display text-sm text-stone-500 tracking-[0.3em]">OUTWIT • OUTPLAY • OUTLAST</span>
         </div>
         
@@ -387,6 +425,11 @@ export default function App() {
 
       <Navigation />
       
+      {/* Large Background Logo Watermark */}
+      <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-0 overflow-hidden opacity-[0.05]">
+         <KinettixLogo size={1000} className="rotate-12 translate-x-20 drop-shadow-[0_0_50px_rgba(14,165,233,0.3)]" />
+      </div>
+      
       <main className="max-w-7xl mx-auto px-6 relative z-10">
         <AnimatePresence mode="wait">
           {currentView === 'roster' && (
@@ -398,14 +441,20 @@ export default function App() {
               className="grid grid-cols-1 lg:grid-cols-5 gap-8"
             >
               {/* Tribe Setup */}
-              <section className="lg:col-span-2 survivor-card p-8 group relative">
-                <div className="absolute -bottom-8 -right-8 opacity-10 group-hover:opacity-20 transition-opacity">
-                   <TikiGuard color="#f97316" />
+              <section className="lg:col-span-2 hawaiian-card p-10 group relative border-ocean-blue/20">
+                <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none">
+                  <div className="polynesian-pattern w-full h-full" />
                 </div>
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-torch-orange to-transparent" />
-                <div className="flex items-center justify-between mb-8">
-                  <h2 className="tribal-header text-3xl flex items-center gap-3">
-                    <Skull className="text-stone-500" /> Kinetttix Tribes
+                <div className="absolute -bottom-6 -right-6 opacity-30 group-hover:opacity-50 transition-opacity">
+                   <TikiGuard color="#0ea5e9" />
+                </div>
+                <div className="absolute top-0 right-0 p-4 opacity-10">
+                   <Flower size={64} className="text-hibiscus animate-sway" />
+                </div>
+                <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-transparent via-lagoon to-transparent" />
+                <div className="flex items-center justify-between mb-8 relative z-10">
+                  <h2 className="tribal-header text-4xl flex items-center gap-3">
+                    <Bird className="text-hibiscus" /> TRIBES
                   </h2>
                   <div className="flex items-center gap-3">
                     <div className="flex flex-col items-end">
@@ -433,83 +482,86 @@ export default function App() {
                             setTribes(tribes.slice(0, count));
                           }
                         }}
-                        className="w-16 bg-stone-900 border border-[#44403c] text-torch-orange font-display text-xl text-center rounded focus:outline-none focus:border-torch-orange"
+                        className="w-16 bg-stone-950 border-2 border-stone-800 text-lagoon font-display text-2xl text-center rounded-xl focus:outline-none focus:border-lagoon shadow-inner"
                       />
                     </div>
                     <button 
                       onClick={() => setTribes([...tribes, { id: crypto.randomUUID(), name: `Tribe ${tribes.length + 1}`, color: TRIBAL_COLORS[tribes.length % TRIBAL_COLORS.length].value, leader: '', playerIds: [] }])}
-                      className="p-3 bg-stone-800 text-torch-orange border border-[#44403c] rounded-lg hover:bg-stone-700 transition-all hover:scale-110 active:scale-95"
+                      className="p-4 bg-stone-800 text-lagoon border-2 border-stone-700 rounded-2xl hover:bg-stone-700 transition-all hover:scale-110 active:scale-95 shadow-lg"
                     >
                       <Plus size={24} />
                     </button>
                   </div>
                 </div>
                 
-                <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar relative z-10">
                   {tribes.map((tribe) => (
                     <motion.div 
                       layout
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
                       key={tribe.id}
-                      className="p-5 rounded-lg bg-stone-900/50 border border-[#292524] flex items-center gap-4 group/item"
+                      className="p-6 rounded-2xl bg-stone-950/40 border-2 border-stone-800 flex items-center gap-5 group/item hover:border-stone-700 transition-all shadow-md"
                     >
                       <input 
                         type="color"
                         value={tribe.color}
                         onChange={(e) => setTribes(tribes.map(t => t.id === tribe.id ? { ...t, color: e.target.value } : t))}
-                        className="w-10 h-10 rounded cursor-pointer bg-transparent border-none"
+                        className="w-12 h-12 rounded-full cursor-pointer bg-transparent border-4 border-stone-800 shadow-lg"
                       />
-                      <div className="flex-grow grid grid-cols-1 gap-2">
+                      <div className="flex-grow grid grid-cols-1 gap-1">
                         <input 
                           placeholder="Tribe Name"
                           value={tribe.name}
                           onChange={(e) => setTribes(tribes.map(t => t.id === tribe.id ? { ...t, name: e.target.value } : t))}
-                          className="bg-transparent font-display text-xl text-stone-100 border-b border-[#44403c] focus:border-torch-orange focus:outline-none placeholder:text-stone-700"
+                          className="bg-transparent font-display text-2xl text-stone-100 border-b border-stone-800/50 focus:border-lagoon focus:outline-none placeholder:text-stone-800 transition-colors"
                         />
-                        <input 
-                          placeholder="Tribe Leader"
-                          value={tribe.leader}
-                          onChange={(e) => setTribes(tribes.map(t => t.id === tribe.id ? { ...t, leader: e.target.value } : t))}
-                          className="bg-transparent text-sm text-stone-500 border-b border-transparent focus:border-stone-700 focus:outline-none placeholder:text-stone-700"
-                        />
+                        <div className="flex items-center gap-2">
+                           <Shield size={12} className="text-stone-600" />
+                           <input 
+                             placeholder="Tribe Leader"
+                             value={tribe.leader}
+                             onChange={(e) => setTribes(tribes.map(t => t.id === tribe.id ? { ...t, leader: e.target.value } : t))}
+                             className="bg-transparent text-sm text-stone-600 border-b border-transparent focus:border-stone-800 focus:outline-none placeholder:text-stone-800 font-hand text-lg"
+                           />
+                        </div>
                       </div>
                       <button 
                         onClick={() => setTribes(tribes.filter(t => t.id !== tribe.id))}
-                        className="text-stone-700 hover:text-red-500 transition-colors"
+                        className="text-stone-800 hover:text-hibiscus transition-colors p-2"
                       >
-                        <Trash2 size={20} />
+                        <Trash2 size={24} />
                       </button>
                     </motion.div>
                   ))}
-                  {tribes.length === 0 && (
-                    <div className="text-center py-20 border-2 border-dashed border-[#292524] rounded-xl">
-                      <Compass className="w-12 h-12 text-stone-800 mx-auto mb-4" />
-                      <p className="font-display text-stone-600 tracking-widest uppercase">No Tribes Found</p>
-                    </div>
-                  )}
                 </div>
               </section>
 
               {/* Player Log */}
-              <section className="lg:col-span-3 survivor-card p-8">
-                <div className="absolute top-0 right-0 p-10 opacity-5 -rotate-12 pointer-events-none">
-                  <Palmtree size={200} />
+              <section className="lg:col-span-3 hawaiian-card p-10 border-hibiscus/20 overflow-visible">
+                <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none">
+                  <div className="polynesian-pattern w-full h-full" />
+                </div>
+                <div className="absolute -top-12 -right-12 p-10 opacity-10 -rotate-12 pointer-events-none">
+                  <Palmtree size={300} className="text-emerald-500 animate-sway" />
+                </div>
+                <div className="absolute -bottom-10 -left-10 opacity-10 pointer-events-none">
+                   <Waves size={180} className="text-ocean-blue" />
                 </div>
                 
-                <h2 className="tribal-header text-3xl mb-8 flex items-center gap-3">
-                  <Users className="text-stone-500" /> Tribe Roster
+                <h2 className="tribal-header text-4xl mb-10 flex items-center gap-4 relative z-10">
+                  <Waves className="text-ocean-blue" /> TRIBE APPLICANTS
                 </h2>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                  <div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10 relative z-10">
+                  <div className="flex flex-col">
                     <textarea 
-                      placeholder="Enter names (e.g. John Doe, M, Supervisor)"
-                      className="w-full h-48 px-4 py-3 bg-[#0c0a09] text-stone-300 rounded-xl border border-[#292524] focus:border-torch-orange focus:outline-none font-mono text-sm shadow-inner"
+                      placeholder="Input castaways (Name, Gender, Supervisor)..."
+                      className="w-full h-56 px-5 py-4 bg-stone-950/80 text-stone-100 rounded-[2rem] border-4 border-stone-800 focus:border-lagoon focus:outline-none font-mono text-base shadow-inner resize-none transition-colors backdrop-blur-sm"
                       value={rawPlayersInput}
                       onChange={(e) => setRawPlayersInput(e.target.value)}
                     />
-                      <div className="flex flex-col gap-3 mt-4">
+                      <div className="flex flex-col gap-4 mt-6">
                         <button 
                           onClick={() => {
                             const lines = rawPlayersInput.split('\n').filter(l => l.trim().includes(','));
@@ -544,57 +596,67 @@ export default function App() {
                             setPlayers([...players, ...newPlayers]);
                             setRawPlayersInput('');
                           }}
-                          className="w-full py-4 bg-stone-800 border border-stone-700 text-stone-200 font-display text-lg lg:text-xl tracking-widest hover:bg-stone-700 hover:border-torch-orange transition-all flex items-center justify-center gap-3"
+                          className="w-full py-5 bg-stone-800/90 border-2 border-stone-700 text-stone-100 font-display text-2xl tracking-[0.2em] rounded-[1.5rem] hover:bg-stone-700 hover:border-lagoon hover:text-lagoon transition-all flex items-center justify-center gap-4 shadow-xl active:scale-95 group/btn"
                         >
-                          <Plus size={24} className="text-torch-orange" /> ADD USER(S)
+                          <Plus size={32} className="text-lagoon group-hover/btn:rotate-90 transition-transform" /> INITIATE BOARDING
                         </button>
-
-
                       </div>
                   </div>
 
-                  <div className="bg-stone-900/80 p-6 rounded-xl border border-[#292524]">
-                    <div className="flex items-center justify-between mb-4 border-b border-[#292524] pb-2">
-                       <div className="flex items-center gap-3">
-                         <span className="font-display text-stone-500">READY FOR THE DROP</span>
-                         <span className="font-mono text-torch-orange">{players.length}</span>
+                  <div className="bg-stone-950/40 p-8 rounded-[2rem] border-4 border-stone-800 flex flex-col h-full shadow-2xl relative overflow-hidden backdrop-blur-sm">
+                    <div className="absolute -top-10 -right-10 opacity-5">
+                       <Flower size={150} className="text-hibiscus" />
+                    </div>
+                    <div className="flex items-center justify-between mb-6 border-b-2 border-stone-800 pb-4 relative z-10">
+                       <div className="flex items-center gap-4">
+                         <span className="font-display text-stone-500 tracking-[0.2em] text-sm">TOTAL CASTAWAYS</span>
+                         <span className="font-display text-4xl text-lagoon drop-shadow-[0_0_10px_rgba(45,212,191,0.5)]">{players.length}</span>
                        </div>
                        {players.length > 0 && (
                          <button 
                            onClick={() => setPlayers([])}
-                           className="text-stone-500 hover:text-torch-red font-display text-[10px] tracking-widest flex items-center gap-1 transition-colors uppercase"
+                           className="text-stone-600 hover:text-hibiscus font-display text-xs tracking-widest flex items-center gap-2 transition-colors uppercase bg-stone-900/50 px-3 py-1.5 rounded-full border border-stone-800"
                          >
-                           <Trash2 size={12} /> Clear List
+                           <Trash2 size={14} /> Clear
                          </button>
                        )}
                     </div>
-                    <div className="max-h-60 overflow-y-auto pr-2 custom-scrollbar flex flex-wrap gap-2">
-                      {players.map(player => (
-                        <motion.div 
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          key={player.id} 
-                          className="group inline-flex items-center gap-2 px-3 py-1.5 bg-stone-800 rounded-md border border-[#44403c] text-sm hover:border-torch-orange transition-all"
-                        >
-                          <div className={cn(
-                            "w-1.5 h-1.5 rounded-full shrink-0",
-                            player.gender === 'Male' ? "bg-sky-400" : player.gender === 'Female' ? "bg-rose-400" : "bg-stone-500"
-                          )} title={player.gender} />
-                          <div className="flex flex-col">
-                            <span className="font-medium text-stone-300 leading-none">{player.name}</span>
-                            <span className={cn(
-                              "text-[10px] font-display tracking-widest uppercase mt-0.5",
-                              player.category === 'Supervisor' ? "text-amber-500" : "text-emerald-400"
-                            )}>{player.supervisorName ? `${player.supervisorName}` : player.category}</span>
-                          </div>
-                          <button 
-                            onClick={() => setPlayers(players.filter(p => p.id !== player.id))}
-                            className="text-stone-600 hover:text-torch-red opacity-0 group-hover:opacity-100 transition-opacity ml-1"
+                    <div className="flex-grow max-h-[14rem] overflow-y-auto pr-3 custom-scrollbar flex flex-wrap gap-3 relative z-10">
+                      {players.length === 0 ? (
+                        <div className="w-full h-full flex flex-col items-center justify-center text-stone-700 border-2 border-dashed border-stone-800 rounded-xl py-10">
+                           <Anchor size={48} className="mb-4 opacity-50" />
+                           <p className="font-display text-xl tracking-widest">NO CASTAWAYS ON BOARD</p>
+                        </div>
+                      ) : (
+                        players.map(player => (
+                          <motion.div 
+                            initial={{ scale: 0, rotate: -5 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            key={player.id} 
+                            className="group inline-flex items-center gap-3 px-4 py-2 bg-stone-900/80 border-2 border-stone-800 rounded-xl text-sm hover:border-lagoon transition-all shadow-md backdrop-blur-sm"
                           >
-                            <Trash2 size={12} />
-                          </button>
-                        </motion.div>
-                      ))}
+                            <div className={cn(
+                              "w-2.5 h-2.5 rounded-full shrink-0",
+                              player.gender === 'Male' ? "bg-ocean-blue" : player.gender === 'Female' ? "bg-hibiscus" : "bg-stone-500 shadow-[0_0_5px_rgba(255,255,255,0.2)]"
+                            )} />
+                            <div className="flex flex-col">
+                              <span className="font-display text-lg text-stone-100 leading-tight">{player.name}</span>
+                              <span className={cn(
+                                "text-[9px] font-display tracking-widest uppercase mt-0.5",
+                                player.category === 'Supervisor' ? "text-sand" : "text-emerald-400"
+                              )}>
+                                 {player.supervisorName || player.category}
+                              </span>
+                            </div>
+                            <button 
+                              onClick={() => setPlayers(players.filter(p => p.id !== player.id))}
+                              className="text-stone-700 hover:text-hibiscus opacity-0 group-hover:opacity-100 transition-opacity ml-2 p-1"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </motion.div>
+                        ))
+                      )}
                     </div>
                   </div>
                 </div>
@@ -603,12 +665,12 @@ export default function App() {
                   <button 
                     disabled={players.length === 0 || tribes.length === 0}
                     onClick={generateTribes}
-                    className="relative group disabled:opacity-30 disabled:grayscale"
+                    className="relative group disabled:opacity-30 disabled:grayscale transition-all"
                   >
-                    <div className="absolute -inset-1 bg-torch-orange blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200" />
-                    <div className="relative px-12 py-6 bg-stone-900 border-2 border-stone-700 rounded-none transform transition hover:scale-105 active:scale-95 flex items-center gap-4">
-                      <Flame className="text-torch-orange group-hover:animate-bounce" />
-                      <span className="font-display text-3xl text-stone-100 tracking-[0.2em]">GENERATE TRIBE MEMBERS</span>
+                    <div className="absolute -inset-2 bg-lagoon blur-xl opacity-20 group-hover:opacity-50 transition duration-1000 group-hover:duration-200" />
+                    <div className="relative px-16 py-8 bg-stone-950 border-4 border-stone-800 rounded-full transform transition hover:scale-105 active:scale-95 flex items-center gap-6 shadow-2xl hover:border-lagoon">
+                      <Flame className="text-lagoon group-hover:animate-pulse" size={36} />
+                      <span className="font-display text-4xl text-stone-100 tracking-[0.3em]">START RITUAL</span>
                     </div>
                   </button>
                 </div>
@@ -621,31 +683,41 @@ export default function App() {
               key="teams"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="min-h-[70vh] flex flex-col items-center"
+              className="min-h-[70vh] flex flex-col items-center relative"
             >
-              <div className="flex flex-col items-center text-center gap-2 mb-10">
-                <h2 className="font-display text-4xl text-stone-100 tracking-[0.2em] flex items-center gap-4">
-                  <Compass className="text-torch-orange animate-spin-slow" /> TRIBAL TERRITORIES <Compass className="text-torch-orange animate-spin-slow" />
-                </h2>
-                <p className="font-hand text-xl text-stone-500 italic opacity-80">
-                  "The tribes have converged. Strength has been distributed."
+              <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-10">
+                <Waves className="absolute top-10 left-10 w-64 h-64 text-ocean-blue rotate-12" />
+                <Waves className="absolute bottom-10 right-10 w-64 h-64 text-lagoon -rotate-12" />
+                <Bird className="absolute top-1/2 left-1/4 w-32 h-32 text-hibiscus animate-sway" />
+              </div>
+
+              <div className="flex flex-col items-center text-center gap-2 mb-10 relative z-10">
+                <div className="flex items-center gap-4 mb-2">
+                   <Flower className="text-hibiscus animate-pulse" size={32} />
+                   <h2 className="font-display text-5xl text-stone-100 tracking-[0.2em] drop-shadow-xl">
+                      ALOHA TRIBES
+                   </h2>
+                   <Flower className="text-hibiscus animate-pulse" size={32} />
+                </div>
+                <p className="font-hand text-2xl text-sand italic">
+                  "The spirits of the islands have spoken. May your journey be fruitful."
                 </p>
 
-                <div className="mt-4 flex gap-4">
+                <div className="mt-8 flex gap-4">
                   <button 
                     onClick={exportToExcel}
                     disabled={revealedCount < Object.keys(revealSequence).length}
-                    className="px-8 py-3 rounded-full bg-stone-900 border border-stone-700 text-stone-400 font-display tracking-widest text-sm flex items-center gap-3 hover:bg-stone-800 hover:text-stone-200 transition-all"
+                    className="px-10 py-4 rounded-full bg-stone-900/80 backdrop-blur-sm border-2 border-stone-700 text-stone-300 font-display tracking-[0.2em] text-sm flex items-center gap-3 hover:bg-stone-800 hover:border-lagoon hover:text-lagoon transition-all shadow-xl active:scale-95"
                   >
-                    <Download size={18} /> DOWNLOAD EXCEL
+                    <Download size={20} /> SYNC TO SCROLL (EXCEL)
                   </button>
                 </div>
               </div>
               
               <div className={cn(
-                "w-full transition-all duration-1000 ease-in-out",
+                "w-full transition-all duration-1000 ease-in-out relative z-10",
                 revealedCount >= Object.keys(revealSequence).length 
-                  ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start" 
+                  ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 items-start px-4" 
                   : "flex items-center justify-center p-4 md:p-12"
               )}>
                 {(() => {
@@ -691,12 +763,13 @@ export default function App() {
                         }}
                         key={tribe.id} 
                         className={cn(
-                          "survivor-card flex flex-col group border-t-8 h-full relative overflow-hidden tribal-pattern transition-shadow duration-700",
+                          "hawaiian-card flex flex-col group border-4 h-full relative overflow-hidden transition-all duration-700",
                           !isAllRevealed ? "w-full max-w-4xl min-h-[550px]" : "w-full max-w-lg min-h-[280px]",
-                          isActiveTribe ? "ring-2 ring-torch-orange/30 shadow-2xl" : "shadow-lg"
+                          isActiveTribe ? "shadow-2xl scale-[1.02]" : "shadow-lg opacity-90"
                         )}
                         style={{ 
-                          borderTopColor: tribe.color
+                          borderColor: tribe.color,
+                          boxShadow: isActiveTribe ? `0 0 60px ${tribe.color}55` : `0 0 20px ${tribe.color}22`
                         }}
                       >
                       <AnimatePresence>
@@ -711,6 +784,9 @@ export default function App() {
                         )}
                       </AnimatePresence>
                       {/* Decorative Background Elements */}
+                      <div className="absolute -bottom-8 -right-8 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none -rotate-12">
+                         <TikiGuard color={tribe.color} />
+                      </div>
                       <div className="absolute -top-10 -right-10 opacity-[0.05] pointer-events-none rotate-45">
                          <Palmtree size={200} style={{ color: tribe.color }} />
                       </div>
@@ -723,15 +799,19 @@ export default function App() {
                       )}
                       <div className="absolute top-0 left-0 w-full h-2 opacity-20 pointer-events-none" style={{ background: `repeating-linear-gradient(90deg, ${tribe.color}, ${tribe.color} 5px, transparent 5px, transparent 10px)` }} />
                       
-                      <div className="p-5 border-b border-[#292524] bg-stone-900/40 relative z-10 flex items-center justify-between">
+                      <div className="p-6 border-b border-stone-800 bg-stone-900/60 relative z-10 flex items-center justify-between">
                          <div>
-                            <h3 className="font-display text-2xl text-stone-100 uppercase tracking-tighter flex items-center gap-2">
+                            <h3 className="font-display text-3xl text-stone-100 uppercase tracking-widest flex items-center gap-3">
+                               <Waves size={20} style={{ color: tribe.color }} />
                                {tribe.name}
                             </h3>
-                            <div className="flex items-center gap-1.5 mt-1 text-stone-500 font-hand text-lg">
-                               <Shield size={14} style={{ color: tribe.color }} />
-                               <span>Leader: {tribe.leader || 'Unknown'}</span>
+                            <div className="flex items-center gap-2 mt-1 text-sand font-hand text-xl italic">
+                               <Shield size={16} />
+                               <span>Leader: {tribe.leader || 'The Island Spirits'}</span>
                             </div>
+                         </div>
+                         <div className="p-3 rounded-full bg-stone-950 border border-stone-800">
+                            <Bird size={24} style={{ color: tribe.color }} />
                          </div>
                       </div>
 
@@ -833,50 +913,84 @@ export default function App() {
               key="compose"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="space-y-12"
+              className="space-y-12 pb-20"
             >
-              <div className="flex items-center justify-between">
-                <h2 className="font-display text-5xl text-stone-100 tracking-widest">TRIBE SCROLLS</h2>
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex flex-col">
+                  <h2 className="font-display text-6xl text-stone-100 tracking-widest drop-shadow-2xl">ISLAND SCROLLS</h2>
+                  <div className="flex items-center gap-2 mt-2">
+                     <Waves className="text-ocean-blue" size={20} />
+                     <span className="font-hand text-2xl text-sand italic">"The rosters are set. The challenge awaits."</span>
+                  </div>
+                </div>
                 <div className="flex gap-4">
-                  <span className="font-hand text-xl text-stone-500 italic rotate-3">The final rosters for the challenge...</span>
                   <button 
                     onClick={() => window.print()} 
-                    className="p-3 bg-stone-800 border border-stone-700 text-torch-orange rounded-full hover:scale-110 shadow-lg"
+                    className="p-4 bg-stone-800 border-2 border-stone-700 text-lagoon rounded-full hover:scale-110 shadow-lg hover:border-lagoon transition-all"
+                    title="Print Tribal Decree"
                   >
-                    <Scroll size={24} />
+                    <Scroll size={28} />
+                  </button>
+                  <button 
+                    onClick={exportToExcel}
+                    className="px-8 py-4 bg-lagoon text-[#064e3b] font-display text-xl tracking-widest rounded-full shadow-xl hover:bg-ocean-blue transition-all flex items-center gap-3 hover:scale-105 active:scale-95"
+                  >
+                    <Download size={24} /> DOWNLOAD SCROLL (EXCEL)
                   </button>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                {tribes.map(tribe => (
-                  <div key={tribe.id} className="relative p-1 bg-[#f5f5f4] shadow-[10px_10px_0px_#1c1917] rotate-1 hover:rotate-0 transition-transform">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+                {tribes.map((tribe, tIdx) => (
+                  <motion.div 
+                    key={tribe.id} 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: tIdx * 0.1 }}
+                    className="relative p-1 bg-[#fef3c7] shadow-[15px_15px_0px_#1c1917] rotate-1 hover:rotate-0 transition-all group"
+                  >
                     {/* Paper Texture Overlay */}
-                    <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/parchment.png")' }} />
-                    <div className="bg-transparent p-10 border-2 border-stone-300">
-                      <div className="border-b-4 border-stone-800 pb-4 mb-8 text-center">
-                        <h3 className="font-display text-4xl text-stone-900 tracking-tighter uppercase">{tribe.name}</h3>
-                        <p className="font-hand text-2xl text-stone-500 mt-1">{tribe.leader}</p>
+                    <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/handmade-paper.png")' }} />
+                    
+                    {/* Tropical Flower Decoration */}
+                    <div className="absolute -top-6 -right-6 z-20 group-hover:scale-125 transition-transform duration-500">
+                       <Flower className="w-12 h-12 text-hibiscus drop-shadow-lg" />
+                    </div>
+                    
+                    <div className="bg-transparent p-10 border-4 border-stone-300 relative overflow-hidden">
+                      {/* Faded Tribal Pattern */}
+                      <div className="absolute inset-0 opacity-5 pointer-events-none polynesian-pattern" />
+                      
+                      <div className="border-b-4 border-stone-900 pb-4 mb-8 text-center relative z-10">
+                        <div className="flex items-center justify-center gap-3 mb-2">
+                           <Waves style={{ color: tribe.color }} size={24} />
+                           <h3 className="font-display text-4xl text-stone-900 tracking-tighter uppercase">{tribe.name}</h3>
+                           <Waves style={{ color: tribe.color }} size={24} />
+                        </div>
+                        <p className="font-hand text-2xl text-stone-600 font-bold tracking-wide italic">"Led by {tribe.leader || 'The Elders'}"</p>
                       </div>
                       
-                      <ul className="space-y-6">
+                      <ul className="space-y-6 relative z-10 px-2">
                         {tribe.playerIds.map((id, index) => {
                           const player = players.find(p => p.id === id);
                           return (
-                            <li key={id} className="flex items-center gap-4 border-b border-stone-200 pb-3 h-16">
-                              <span className="font-display text-stone-400 text-xl self-start mt-1">{(index + 1).toString().padStart(2, '0')}</span>
+                            <li key={id} className="flex items-center gap-5 border-b-2 border-stone-400/30 pb-3 h-16 group/item">
+                              <span className="font-display text-stone-400 text-2xl self-start mt-1 group-hover/item:text-stone-900 transition-colors">{(index + 1).toString().padStart(2, '0')}</span>
                               <div className="flex flex-col flex-grow">
-                                <div className="flex items-center gap-2">
-                                  <span className="font-display text-2xl text-stone-800 tracking-tight">{player?.name}</span>
-                                  {player?.gender === 'Male' ? (
-                                    <Mars size={18} className="text-sky-700/70" />
-                                  ) : player?.gender === 'Female' ? (
-                                    <Venus size={18} className="text-rose-700/70" />
-                                  ) : (
-                                    <MoreHorizontal size={18} className="text-stone-500/70" />
-                                  )}
+                                <div className="flex items-center gap-3">
+                                  <span className="font-display text-2xl text-stone-900 tracking-tight leading-none">{player?.name}</span>
+                                  <div className="flex gap-1 opacity-60">
+                                    {player?.gender === 'Male' ? (
+                                      <Mars size={18} className="text-ocean-blue" />
+                                    ) : player?.gender === 'Female' ? (
+                                      <Venus size={18} className="text-hibiscus" />
+                                    ) : (
+                                      <MoreHorizontal size={18} className="text-stone-500" />
+                                    )}
+                                  </div>
                                 </div>
-                                <span className="font-display text-[10px] text-stone-500 uppercase tracking-widest leading-none mt-1">
+                                <span className="font-display text-xs text-stone-600 uppercase tracking-widest leading-none mt-2 flex items-center gap-1.5">
+                                  <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: tribe.color }} />
                                   {player?.supervisorName ? `${player.supervisorName}` : player?.category}
                                 </span>
                               </div>
@@ -884,18 +998,14 @@ export default function App() {
                           );
                         })}
                       </ul>
+                      
+                      {/* Bottom Decoration */}
+                      <div className="mt-10 flex justify-center opacity-30">
+                         <Bird size={32} className="text-stone-900" />
+                      </div>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
-              </div>
-
-              <div className="flex justify-center mt-12">
-                <button 
-                  onClick={exportToExcel}
-                  className="px-8 py-4 bg-emerald-600 text-white font-display text-2xl tracking-[0.2em] rounded-none shadow-xl hover:bg-emerald-700 transition-all flex items-center gap-4 hover:scale-105 active:scale-95"
-                >
-                  <Download size={24} /> EXPORT RESULTS TO EXCEL
-                </button>
               </div>
             </motion.div>
           )}
