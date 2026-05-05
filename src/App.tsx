@@ -77,21 +77,24 @@ interface Tribe {
   id: string;
   name: string;
   color: string;
-  leader: string;
   playerIds: string[];
+  icon: 'Flame' | 'Waves' | 'Palmtree' | 'Sun' | 'Skull' | 'Anchor';
 }
 
 type View = 'teams' | 'compose' | 'roster' | 'outplay';
 
+type RevealEvent = 
+  | { type: 'TRIBE_INTRO', tribeId: string }
+  | { type: 'PLAYER_REVEAL', playerId: string };
+
 // --- Constants ---
 const TRIBAL_COLORS = [
-  { name: 'Hibiscus Red', value: '#e11d48' },
-  { name: 'Lagoon Blue', value: '#0ea5e9' },
-  { name: 'Jungle Lush', value: '#16a34a' },
-  { name: 'Sunrise Gold', value: '#f97316' },
-  { name: 'Orchid Flower', value: '#d946ef' },
-  { name: 'Sandy Beach', value: '#fde047' },
-  { name: 'Deep Reef', value: '#1e40af' },
+  { name: 'Red Tribe', value: '#e11d48', icon: 'Flame' as const },
+  { name: 'Blue Tribe', value: '#0ea5e9', icon: 'Waves' as const },
+  { name: 'Green Tribe', value: '#16a34a', icon: 'Palmtree' as const },
+  { name: 'Gold Tribe', value: '#f97316', icon: 'Sun' as const },
+  { name: 'Purple Tribe', value: '#d946ef', icon: 'Skull' as const },
+  { name: 'Stone Tribe', value: '#57534e', icon: 'Anchor' as const },
 ];
 
 const GENDERS: Gender[] = ['Male', 'Female', 'Other'];
@@ -100,17 +103,17 @@ const CATEGORIES: Category[] = ['Standard', 'Supervisor'];
 export default function App() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [tribes, setTribes] = useState<Tribe[]>(() => {
-    return Array.from({ length: 6 }).map((_, i) => ({
-      id: crypto.randomUUID(),
-      name: `Tribe ${i + 1}`,
-      color: TRIBAL_COLORS[i % TRIBAL_COLORS.length].value,
-      leader: '',
+    return TRIBAL_COLORS.map((tc, i) => ({
+      id: `tribe-${i + 1}`,
+      name: tc.name,
+      color: tc.value,
+      icon: tc.icon,
       playerIds: []
     }));
   });
   const [currentView, setCurrentView] = useState<View>('roster');
   const [rawPlayersInput, setRawPlayersInput] = useState('');
-  const [revealSequence, setRevealSequence] = useState<Record<string, number>>({});
+  const [revealEvents, setRevealEvents] = useState<RevealEvent[]>([]);
   const [revealedCount, setRevealedCount] = useState(0);
 
   const [isMuted, setIsMuted] = useState(false);
@@ -145,8 +148,6 @@ export default function App() {
     const newTribes = tribes.map(t => ({ ...t, playerIds: [] as string[] }));
 
     let tribeIndex = 0;
-    const newSequence: Record<string, number> = {};
-
     // Distribute from each bucket
     Object.keys(shuffledBuckets).forEach(key => {
       shuffledBuckets[key].forEach(player => {
@@ -155,34 +156,32 @@ export default function App() {
       });
     });
 
-    // Reveal Tribe 1 members first, then Tribe 2...
-    newTribes.forEach((tribe, tIdx) => {
-      tribe.playerIds.forEach((pId, pIdx) => {
-        newSequence[pId] = (tIdx * 100) + pIdx; 
-      });
+    // Create an ordered sequence of events: Tribe Intro -> Players in Tribe -> next...
+    const events: RevealEvent[] = [];
+    newTribes.forEach(tribe => {
+      if (tribe.playerIds.length > 0) {
+        events.push({ type: 'TRIBE_INTRO', tribeId: tribe.id });
+        tribe.playerIds.forEach(pId => {
+          events.push({ type: 'PLAYER_REVEAL', playerId: pId });
+        });
+      }
     });
 
-    const sortedIds = Object.keys(newSequence).sort((a, b) => newSequence[a] - newSequence[b]);
-    const finalSequence: Record<string, number> = {};
-    sortedIds.forEach((id, index) => {
-      finalSequence[id] = index;
-    });
-
-    setRevealedCount(0);
-    setRevealSequence(finalSequence);
+    setRevealedCount(-1);
+    setRevealEvents(events);
     setTribes(newTribes);
     setCurrentView('teams');
   };
 
   // Reveal Timer effect
   useEffect(() => {
-    if (currentView === 'teams' && Object.keys(revealSequence).length > 0) {
-      const total = Object.keys(revealSequence).length;
+    if (currentView === 'teams' && revealEvents.length > 0) {
+      const total = revealEvents.length;
       
-      if (revealedCount < total) {
+      if (revealedCount < total && revealedCount >= 0) {
         // Play audio when reveal starts
         audio.play().catch(e => console.warn("Audio play blocked:", e));
-      } else {
+      } else if (revealedCount >= total) {
         // Stop audio when reveal ends
         const fadeOut = setInterval(() => {
           if (audio.volume > 0.1) {
@@ -195,22 +194,40 @@ export default function App() {
         }, 100);
       }
 
-      const interval = setInterval(() => {
+      // Initial pause of 2.5 seconds before starting the reveal
+      let delay = 3000;
+      
+      if (revealedCount === -1) {
+        delay = 2500;
+      } else {
+        const currentEvent = revealEvents[revealedCount];
+        if (currentEvent?.type === 'TRIBE_INTRO') {
+          delay = 4000; // Long pause for tribe intro
+        } else if (currentEvent?.type === 'PLAYER_REVEAL') {
+          const tribe = tribes.find(t => t.playerIds.includes(currentEvent.playerId));
+          const isLastInTribe = tribe?.playerIds[tribe.playerIds.length - 1] === currentEvent.playerId;
+          
+          if (isLastInTribe && revealedCount < total - 1) {
+            delay = 4000; // Pause after tribe is filled
+          }
+        }
+      }
+
+      const timeout = setTimeout(() => {
         setRevealedCount(prev => {
           if (prev < total) return prev + 1;
-          clearInterval(interval);
           return prev;
         });
-      }, 600); // Reveal speed
+      }, delay);
       
       return () => {
-        clearInterval(interval);
+        clearTimeout(timeout);
       };
     } else {
       audio.pause();
       audio.currentTime = 0;
     }
-  }, [currentView, revealSequence, revealedCount, audio]);
+  }, [currentView, revealEvents, revealedCount, audio, tribes]);
 
   const movePlayer = (playerId: string, fromTribeId: string | null, toTribeId: string) => {
     setTribes(prev => prev.map(tribe => {
@@ -257,7 +274,8 @@ export default function App() {
         Other: tribePlayers.filter(p => p.gender === 'Other').length,
         Standard: tribePlayers.filter(p => p.category === 'Standard').length,
         Supervisor: tribePlayers.filter(p => p.category === 'Supervisor').length,
-        color: tribe.color
+        color: tribe.color,
+        icon: tribe.icon
       };
     });
   }, [tribes, players]);
@@ -284,6 +302,18 @@ export default function App() {
       <path d="M220 300 L320 300 L170 200 L220 250 Z" fill="#f97316" />
     </svg>
   );
+
+  const TribeIconComponent = ({ icon, size = 24, className, style }: { icon: string, size?: number, className?: string, style?: any }) => {
+    switch (icon) {
+      case 'Flame': return <Flame size={size} className={className} style={style} />;
+      case 'Waves': return <Waves size={size} className={className} style={style} />;
+      case 'Palmtree': return <Palmtree size={size} className={className} style={style} />;
+      case 'Sun': return <Sun size={size} className={className} style={style} />;
+      case 'Skull': return <Skull size={size} className={className} style={style} />;
+      case 'Anchor': return <Anchor size={size} className={className} style={style} />;
+      default: return <Bird size={size} className={className} style={style} />;
+    }
+  };
 
   const TikiGuard = ({ color }: { color: string }) => (
     <div className="relative w-28 h-44 flex flex-col items-center justify-end group">
@@ -454,43 +484,10 @@ export default function App() {
                 <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-transparent via-lagoon to-transparent" />
                 <div className="flex items-center justify-between mb-8 relative z-10">
                   <h2 className="tribal-header text-4xl flex items-center gap-3">
-                    <Bird className="text-hibiscus" /> TRIBES
+                    <Users className="text-hibiscus" /> TRIBES
                   </h2>
                   <div className="flex items-center gap-3">
-                    <div className="flex flex-col items-end">
-                      <label className="text-[10px] font-display text-stone-600 tracking-widest uppercase">Count</label>
-                      <input 
-                        type="number"
-                        min="1"
-                        max="20"
-                        value={tribes.length}
-                        onChange={(e) => {
-                          const count = Math.max(1, parseInt(e.target.value) || 0);
-                          if (count > tribes.length) {
-                            const newTribes = [...tribes];
-                            for (let i = tribes.length; i < count; i++) {
-                              newTribes.push({ 
-                                id: crypto.randomUUID(), 
-                                name: `Tribe ${i + 1}`, 
-                                color: TRIBAL_COLORS[i % TRIBAL_COLORS.length].value, 
-                                leader: '', 
-                                playerIds: [] 
-                              });
-                            }
-                            setTribes(newTribes);
-                          } else if (count < tribes.length) {
-                            setTribes(tribes.slice(0, count));
-                          }
-                        }}
-                        className="w-16 bg-stone-950 border-2 border-stone-800 text-lagoon font-display text-2xl text-center rounded-xl focus:outline-none focus:border-lagoon shadow-inner"
-                      />
-                    </div>
-                    <button 
-                      onClick={() => setTribes([...tribes, { id: crypto.randomUUID(), name: `Tribe ${tribes.length + 1}`, color: TRIBAL_COLORS[tribes.length % TRIBAL_COLORS.length].value, leader: '', playerIds: [] }])}
-                      className="p-4 bg-stone-800 text-lagoon border-2 border-stone-700 rounded-2xl hover:bg-stone-700 transition-all hover:scale-110 active:scale-95 shadow-lg"
-                    >
-                      <Plus size={24} />
-                    </button>
+                    <span className="font-display text-lagoon text-4xl">6</span>
                   </div>
                 </div>
                 
@@ -503,12 +500,12 @@ export default function App() {
                       key={tribe.id}
                       className="p-6 rounded-2xl bg-stone-950/40 border-2 border-stone-800 flex items-center gap-5 group/item hover:border-stone-700 transition-all shadow-md"
                     >
-                      <input 
-                        type="color"
-                        value={tribe.color}
-                        onChange={(e) => setTribes(tribes.map(t => t.id === tribe.id ? { ...t, color: e.target.value } : t))}
-                        className="w-12 h-12 rounded-full cursor-pointer bg-transparent border-4 border-stone-800 shadow-lg"
-                      />
+                      <div 
+                        className="w-12 h-12 rounded-full border-4 border-stone-800 flex items-center justify-center shadow-lg"
+                        style={{ backgroundColor: tribe.color }}
+                      >
+                         <TribeIconComponent icon={tribe.icon} size={20} className="text-white" />
+                      </div>
                       <div className="flex-grow grid grid-cols-1 gap-1">
                         <input 
                           placeholder="Tribe Name"
@@ -516,22 +513,8 @@ export default function App() {
                           onChange={(e) => setTribes(tribes.map(t => t.id === tribe.id ? { ...t, name: e.target.value } : t))}
                           className="bg-transparent font-display text-2xl text-stone-100 border-b border-stone-800/50 focus:border-lagoon focus:outline-none placeholder:text-stone-800 transition-colors"
                         />
-                        <div className="flex items-center gap-2">
-                           <Shield size={12} className="text-stone-600" />
-                           <input 
-                             placeholder="Tribe Leader"
-                             value={tribe.leader}
-                             onChange={(e) => setTribes(tribes.map(t => t.id === tribe.id ? { ...t, leader: e.target.value } : t))}
-                             className="bg-transparent text-sm text-stone-600 border-b border-transparent focus:border-stone-800 focus:outline-none placeholder:text-stone-800 font-hand text-lg"
-                           />
-                        </div>
+                        <span className="text-[10px] text-stone-600 font-display tracking-widest uppercase">{tribe.icon} SYMBOL</span>
                       </div>
-                      <button 
-                        onClick={() => setTribes(tribes.filter(t => t.id !== tribe.id))}
-                        className="text-stone-800 hover:text-hibiscus transition-colors p-2"
-                      >
-                        <Trash2 size={24} />
-                      </button>
                     </motion.div>
                   ))}
                 </div>
@@ -688,7 +671,7 @@ export default function App() {
               <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-10">
                 <Waves className="absolute top-10 left-10 w-64 h-64 text-ocean-blue rotate-12" />
                 <Waves className="absolute bottom-10 right-10 w-64 h-64 text-lagoon -rotate-12" />
-                <Bird className="absolute top-1/2 left-1/4 w-32 h-32 text-hibiscus animate-sway" />
+                <Skull className="absolute top-1/2 left-1/4 w-32 h-32 text-hibiscus animate-sway" />
               </div>
 
               <div className="flex flex-col items-center text-center gap-2 mb-10 relative z-10">
@@ -706,7 +689,7 @@ export default function App() {
                 <div className="mt-8 flex gap-4">
                   <button 
                     onClick={exportToExcel}
-                    disabled={revealedCount < Object.keys(revealSequence).length}
+                    disabled={revealedCount < revealEvents.length}
                     className="px-10 py-4 rounded-full bg-stone-900/80 backdrop-blur-sm border-2 border-stone-700 text-stone-300 font-display tracking-[0.2em] text-sm flex items-center gap-3 hover:bg-stone-800 hover:border-lagoon hover:text-lagoon transition-all shadow-xl active:scale-95"
                   >
                     <Download size={20} /> SYNC TO SCROLL (EXCEL)
@@ -715,24 +698,262 @@ export default function App() {
               </div>
               
               <div className={cn(
-                "w-full transition-all duration-1000 ease-in-out relative z-10",
-                revealedCount >= Object.keys(revealSequence).length 
+                "w-full transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] relative z-10",
+                revealedCount >= revealEvents.length 
                   ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 items-start px-4" 
-                  : "flex items-center justify-center p-4 md:p-12"
+                  : "flex items-center justify-center p-4 md:p-12 mb-20"
               )}>
                 {(() => {
-                  const totalToReveal = Object.keys(revealSequence).length;
-                  const isAllRevealed = revealedCount >= totalToReveal && totalToReveal > 0;
-                  const currentRevealingPlayerId = Object.keys(revealSequence).find(id => revealSequence[id] === revealedCount);
-                  const activeTribeId = tribes.find(t => t.playerIds.includes(currentRevealingPlayerId || ''))?.id;
+                  const totalEvents = revealEvents.length;
+                  const isAllRevealed = revealedCount >= totalEvents && totalEvents > 0;
+                  
+                  const currentEvent = revealedCount >= 0 && revealedCount < totalEvents ? revealEvents[revealedCount] : null;
+                  
+                  // For intro splash
+                  if (currentEvent?.type === 'TRIBE_INTRO' && !isAllRevealed) {
+                    const tribe = tribes.find(t => t.id === currentEvent.tribeId);
+                    if (!tribe) return null;
+                    return (
+                      <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0, scale: 1.1, filter: "blur(20px)" }}
+                        key={`intro-${tribe.id}`}
+                        className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-stone-950 overflow-hidden"
+                      >
+                        {/* Background Elemental Effects */}
+                        <div className="absolute inset-0 pointer-events-none scale-110">
+                           {/* Fire Embers */}
+                           {[...Array(40)].map((_, i) => (
+                             <motion.div
+                               key={`ember-${i}`}
+                               initial={{ 
+                                 x: Math.random() * 100 + "%", 
+                                 y: "110%", 
+                                 opacity: 0,
+                                 scale: Math.random() * 0.5 + 0.5
+                               }}
+                               animate={{ 
+                                 y: "-10%", 
+                                 opacity: [0, 0.9, 0],
+                                 x: (Math.random() * 100 + (Math.sin(i * 0.5) * 15)) + "%",
+                                 rotate: 360
+                               }}
+                               transition={{ 
+                                 duration: Math.random() * 4 + 3, 
+                                 repeat: Infinity, 
+                                 delay: Math.random() * 5 
+                               }}
+                               className="absolute w-1.5 h-1.5 rounded-full"
+                               style={{ 
+                                 backgroundColor: tribe.color, 
+                                 boxShadow: `0 0 12px ${tribe.color}, 0 0 20px #fff4` 
+                               }}
+                             />
+                           ))}
+
+                           {/* Lightning Bolts */}
+                           {[...Array(2)].map((_, i) => (
+                             <motion.svg
+                               key={`lightning-${i}`}
+                               className="absolute w-full h-full text-white/40"
+                               initial={{ opacity: 0 }}
+                               animate={{ 
+                                 opacity: [0, 1, 0, 0.8, 0],
+                                 filter: ["blur(1px)", "blur(0px)", "blur(2px)"]
+                               }}
+                               transition={{ 
+                                 duration: 0.2, 
+                                 repeat: Infinity, 
+                                 repeatDelay: Math.random() * 4 + 2,
+                                 delay: i * 2
+                               }}
+                               viewBox="0 0 100 100"
+                               preserveAspectRatio="none"
+                             >
+                               <path 
+                                 d={`M ${20 + Math.random() * 60} 0 L ${15 + Math.random() * 70} 30 L ${25 + Math.random() * 50} 50 L ${10 + Math.random() * 80} 100`}
+                                 fill="none" 
+                                 stroke="currentColor" 
+                                 strokeWidth="0.5"
+                               />
+                             </motion.svg>
+                           ))}
+
+                           {/* Rain Particles */}
+                           {[...Array(60)].map((_, i) => (
+                             <motion.div
+                               key={`rain-${i}`}
+                               initial={{ 
+                                 x: Math.random() * 100 + "%", 
+                                 y: "-10%", 
+                                 opacity: 0
+                               }}
+                               animate={{ 
+                                 y: "110%", 
+                                 opacity: [0, 0.3, 0]
+                               }}
+                               transition={{ 
+                                 duration: 0.5 + Math.random() * 0.3, 
+                                 repeat: Infinity, 
+                                 delay: Math.random() * 2 
+                               }}
+                               className="absolute w-[1px] h-12 bg-white/20 origin-bottom"
+                               style={{ transform: 'rotate(15deg)' }}
+                             />
+                           ))}
+
+                           {/* Wind Streaks */}
+                           {[...Array(15)].map((_, i) => (
+                             <motion.div
+                               key={`wind-${i}`}
+                               initial={{ 
+                                 x: "-20%", 
+                                 y: Math.random() * 100 + "%", 
+                                 opacity: 0
+                               }}
+                               animate={{ 
+                                 x: "120%", 
+                                 opacity: [0, 0.15, 0],
+                                 skewX: [0, 20, 0]
+                               }}
+                               transition={{ 
+                                 duration: 2 + Math.random() * 2, 
+                                 repeat: Infinity, 
+                                 delay: Math.random() * 5,
+                                 ease: "easeInOut"
+                               }}
+                               className="absolute w-64 h-[1px] bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                             />
+                           ))}
+
+                           {/* Lightning Background Flashes */}
+                           <motion.div 
+                             animate={{ 
+                               opacity: [0, 0.2, 0, 0.3, 0, 0.1, 0]
+                             }}
+                             transition={{ 
+                               duration: 5, 
+                               repeat: Infinity, 
+                               times: [0, 0.1, 0.12, 0.18, 0.22, 0.3, 1] 
+                             }}
+                             className="absolute inset-0 bg-white mix-blend-overlay"
+                           />
+
+                           {/* Smoke/Haze */}
+                           <motion.div 
+                             animate={{ 
+                               scale: [1, 1.3, 1.2, 1],
+                               rotate: [0, 10, -10, 0],
+                               opacity: [0.1, 0.3, 0.1]
+                             }}
+                             transition={{ duration: 12, repeat: Infinity }}
+                             className="absolute inset-0 bg-gradient-to-tr from-transparent via-stone-800/30 to-transparent blur-3xl"
+                           />
+                        </div>
+
+                        <motion.div
+                          initial={{ scale: 0.5, opacity: 0, rotate: -10 }}
+                          animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                          transition={{ type: "spring", damping: 15, stiffness: 100 }}
+                          className="relative mb-12 z-10"
+                        >
+                           <div 
+                             className="absolute inset-0 blur-[100px] opacity-60 rounded-full" 
+                             style={{ backgroundColor: tribe.color }} 
+                           />
+                           <div className="relative p-12 bg-stone-900 border-8 border-stone-800 rounded-full shadow-[0_0_100px_rgba(0,0,0,0.8)]">
+                              <TribeIconComponent icon={tribe.icon} size={160} style={{ color: tribe.color }} className="drop-shadow-[0_0_30px_rgba(0,0,0,0.8)]" />
+                           </div>
+                           
+                           {/* Animated rings */}
+                           {[...Array(3)].map((_, i) => (
+                             <motion.div 
+                               key={i}
+                               animate={{ 
+                                 scale: [1, 1.5], 
+                                 opacity: [0.5, 0],
+                                 rotate: i % 2 === 0 ? 360 : -360
+                               }}
+                               transition={{ 
+                                 duration: 3, 
+                                 repeat: Infinity, 
+                                 delay: i * 1,
+                                 ease: "easeOut"
+                               }}
+                               className="absolute -inset-8 border-4 rounded-full"
+                               style={{ borderColor: tribe.color, borderStyle: i === 1 ? 'dashed' : 'solid' }}
+                             />
+                           ))}
+                        </motion.div>
+                        
+                        <div className="relative z-10 text-center">
+                          <motion.div
+                            initial={{ y: 50, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 0.4, duration: 1 }}
+                          >
+                            <h2 
+                              className="font-display text-9xl md:text-[12rem] text-stone-100 tracking-[0.3em] uppercase drop-shadow-[0_10px_30px_rgba(0,0,0,1)] inline-block"
+                              style={{ 
+                                textShadow: `0 0 40px ${tribe.color}66`
+                              }}
+                            >
+                              {tribe.name}
+                            </h2>
+                          </motion.div>
+
+                          <motion.div 
+                            initial={{ scaleX: 0, opacity: 0 }}
+                            animate={{ scaleX: 1, opacity: 1 }}
+                            transition={{ delay: 1, duration: 1.5 }}
+                            className="flex items-center justify-center gap-10 mt-8"
+                          >
+                             <div className="h-1 lg:w-48 bg-gradient-to-r from-transparent to-stone-600" />
+                             <div className="flex flex-col gap-2">
+                               <span className="font-hand text-5xl text-sand italic tracking-widest drop-shadow-md">The spirits have spoken...</span>
+                               <motion.div 
+                                 animate={{ opacity: [0.4, 1, 0.4] }}
+                                 transition={{ duration: 2, repeat: Infinity }}
+                                 className="flex justify-center gap-4 text-stone-500"
+                               >
+                                 <Waves size={24} />
+                                 <TribeIconComponent icon={tribe.icon} size={24} />
+                                 <Shield size={24} />
+                               </motion.div>
+                             </div>
+                             <div className="h-1 lg:w-48 bg-gradient-to-l from-transparent to-stone-600" />
+                          </motion.div>
+                        </div>
+
+                        {/* Ground shadow/glow */}
+                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[200%] h-64 bg-gradient-to-t from-stone-950 to-transparent opacity-90 blur-3xl" />
+                      </motion.div>
+                    );
+                  }
+
+                  // Determine active tribe for player reveal
+                  let activeTribeId: string | undefined;
+                  if (currentEvent?.type === 'PLAYER_REVEAL') {
+                    activeTribeId = tribes.find(t => t.playerIds.includes(currentEvent.playerId))?.id;
+                  } else if (revealedCount === -1 && revealEvents.length > 0) {
+                    // Pre-start: target first tribe intro
+                    const firstEvent = revealEvents[0];
+                    if (firstEvent.type === 'TRIBE_INTRO') activeTribeId = firstEvent.tribeId;
+                  }
                   
                   const tribesToDisplay = isAllRevealed ? tribes : tribes.filter(t => t.id === activeTribeId);
 
                   return tribesToDisplay.map((tribe) => {
-                    const revealedInTribe = tribe.playerIds.filter(id => (revealSequence[id] ?? 0) <= revealedCount);
+                    // Logic to see who is revealed in this tribe
+                    // A player is revealed if their PLAYER_REVEAL event index is <= revealedCount
+                    const revealedInTribe = tribe.playerIds.filter(pid => {
+                      const eventIndex = revealEvents.findIndex(e => e.type === 'PLAYER_REVEAL' && e.playerId === pid);
+                      return eventIndex !== -1 && eventIndex <= revealedCount;
+                    });
+
                     const isFinished = revealedInTribe.length === tribe.playerIds.length && tribe.playerIds.length > 0 && isAllRevealed;
-                    const currentRevealingId = Object.keys(revealSequence).find(id => revealSequence[id] === revealedCount);
-                    const isActiveTribe = tribe.playerIds.includes(currentRevealingId || '');
+                    const isActiveTribe = tribe.id === activeTribeId;
 
                     return (
                       <motion.div 
@@ -757,13 +978,13 @@ export default function App() {
                               }
                         }
                         transition={{ 
-                          duration: 1.2,
-                          times: [0, 0.4, 1],
+                          duration: 0.4,
+                          times: [0, 0.2, 1],
                           ease: [0.22, 1, 0.36, 1]
                         }}
                         key={tribe.id} 
                         className={cn(
-                          "hawaiian-card flex flex-col group border-4 h-full relative overflow-hidden transition-all duration-700",
+                          "hawaiian-card flex flex-col group border-4 h-full relative overflow-hidden transition-all duration-300",
                           !isAllRevealed ? "w-full max-w-4xl min-h-[550px]" : "w-full max-w-lg min-h-[280px]",
                           isActiveTribe ? "shadow-2xl scale-[1.02]" : "shadow-lg opacity-90"
                         )}
@@ -802,16 +1023,12 @@ export default function App() {
                       <div className="p-6 border-b border-stone-800 bg-stone-900/60 relative z-10 flex items-center justify-between">
                          <div>
                             <h3 className="font-display text-3xl text-stone-100 uppercase tracking-widest flex items-center gap-3">
-                               <Waves size={20} style={{ color: tribe.color }} />
+                               <TribeIconComponent icon={tribe.icon} size={20} style={{ color: tribe.color }} />
                                {tribe.name}
                             </h3>
-                            <div className="flex items-center gap-2 mt-1 text-sand font-hand text-xl italic">
-                               <Shield size={16} />
-                               <span>Leader: {tribe.leader || 'The Island Spirits'}</span>
-                            </div>
                          </div>
                          <div className="p-3 rounded-full bg-stone-950 border border-stone-800">
-                            <Bird size={24} style={{ color: tribe.color }} />
+                            <TribeIconComponent icon={tribe.icon} size={24} style={{ color: tribe.color }} />
                          </div>
                       </div>
 
@@ -821,28 +1038,27 @@ export default function App() {
                               {tribe.playerIds.map(id => {
                                 const player = players.find(p => p.id === id);
                                 if (!player) return null;
-                                const seqIndex = revealSequence[id] ?? 0;
-                                if (seqIndex > revealedCount) return null;
+                                
+                                const eventIndex = revealEvents.findIndex(e => e.type === 'PLAYER_REVEAL' && e.playerId === id);
+                                if (eventIndex === -1 || eventIndex > revealedCount) return null;
                                 
                                 return (
                                   <motion.div 
                                     key={id}
-                                    initial={{ scale: 0, opacity: 0, filter: "blur(10px)" }}
+                                    initial={{ scale: 0.5, opacity: 0, scaleY: 0 }}
                                     animate={{ 
                                       scale: 1, 
                                       opacity: 1, 
-                                      filter: "blur(0px)",
+                                      scaleY: 1,
                                     }}
                                     transition={{
-                                      type: "spring",
-                                      damping: 15,
-                                      stiffness: 200,
-                                      mass: 0.8
+                                      duration: 3.0,
+                                      ease: [0.22, 1, 0.36, 1]
                                     }}
                                     className={cn(
                                       "relative p-3 bg-stone-800/80 rounded border-2 border-stone-700 shadow-xl group/token overflow-hidden flex items-center justify-center transition-all",
                                       isFinished ? "min-h-[50px]" : "min-h-[65px]",
-                                      seqIndex === revealedCount && "ring-2 ring-torch-orange animate-pulse"
+                                      eventIndex === revealedCount && "ring-2 ring-torch-orange animate-pulse"
                                     )}
                                   >
                                      <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-stone-400/20 to-transparent" />
@@ -870,7 +1086,7 @@ export default function App() {
                                      </div>
 
                                      {/* Energetic reveal effect */}
-                                     {seqIndex === revealedCount && (
+                                     {eventIndex === revealedCount && (
                                        <motion.div
                                           initial={{ width: 0, opacity: 0 }}
                                           animate={{ 
@@ -878,7 +1094,7 @@ export default function App() {
                                             opacity: [0, 0.4, 0],
                                             left: ["0%", "0%", "100%"]
                                           }}
-                                          transition={{ duration: 0.8, ease: "easeInOut" }}
+                                          transition={{ duration: 3.0, ease: "easeInOut" }}
                                           className="absolute inset-x-0 h-full bg-stone-100 mix-blend-overlay pointer-events-none"
                                        />
                                      )}
@@ -967,7 +1183,6 @@ export default function App() {
                            <h3 className="font-display text-4xl text-stone-900 tracking-tighter uppercase">{tribe.name}</h3>
                            <Waves style={{ color: tribe.color }} size={24} />
                         </div>
-                        <p className="font-hand text-2xl text-stone-600 font-bold tracking-wide italic">"Led by {tribe.leader || 'The Elders'}"</p>
                       </div>
                       
                       <ul className="space-y-6 relative z-10 px-2">
@@ -1001,7 +1216,7 @@ export default function App() {
                       
                       {/* Bottom Decoration */}
                       <div className="mt-10 flex justify-center opacity-30">
-                         <Bird size={32} className="text-stone-900" />
+                         <TribeIconComponent icon={tribe.icon} size={32} className="text-stone-900" />
                       </div>
                     </div>
                   </motion.div>
@@ -1132,7 +1347,7 @@ export default function App() {
                       className="p-6 bg-stone-900/50 border border-[#292524] rounded-lg relative overflow-hidden"
                     >
                       <div className="absolute top-0 right-0 w-16 h-16 opacity-5 rotate-12 -mr-4 -mt-4">
-                        <Flame size={64} style={{ color: tribeStat.color }} />
+                        <TribeIconComponent icon={tribeStat.icon} size={64} style={{ color: tribeStat.color }} />
                       </div>
                       <div className="flex items-center justify-between mb-4">
                         <h4 className="font-display text-2xl text-stone-100 uppercase tracking-tighter" style={{ color: tribeStat.color }}>{tribeStat.name}</h4>
