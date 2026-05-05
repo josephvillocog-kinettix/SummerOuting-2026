@@ -194,11 +194,11 @@ export default function App() {
         }, 100);
       }
 
-      // Initial pause of 2.5 seconds before starting the reveal
-      let delay = 3000;
+      // Initial pause for Tribal Council initiation
+      let delay = 4000;
       
       if (revealedCount === -1) {
-        delay = 2500;
+        delay = 4500; // Time for "Tribal Council Begins" screen
       } else {
         const currentEvent = revealEvents[revealedCount];
         if (currentEvent?.type === 'TRIBE_INTRO') {
@@ -715,6 +715,78 @@ export default function App() {
                   const isAllRevealed = revealedCount >= totalEvents && totalEvents > 0;
                   
                   const currentEvent = revealedCount >= 0 && revealedCount < totalEvents ? revealEvents[revealedCount] : null;
+
+                  // Initial Initiation Splash
+                  if (revealedCount === -1 && totalEvents > 0) {
+                    return (
+                      <motion.div
+                        key="council-initiation"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0, scale: 1.5, filter: "blur(20px)" }}
+                        className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-stone-950 overflow-hidden"
+                      >
+                         {/* Background Ambience */}
+                        <div className="absolute inset-0">
+                           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_#451a03_0%,_transparent_70%)] opacity-40" />
+                           
+                           {/* Flickering Torches (Sides) */}
+                           <div className="absolute left-10 top-1/2 -translate-y-1/2 flex flex-col gap-40">
+                              <TikiGuard color="#f97316" />
+                              <TikiGuard color="#f97316" />
+                           </div>
+                           <div className="absolute right-10 top-1/2 -translate-y-1/2 flex flex-col gap-40">
+                              <TikiGuard color="#f97316" />
+                              <TikiGuard color="#f97316" />
+                           </div>
+
+                           {/* Smoke/Haze */}
+                           <motion.div 
+                             animate={{ 
+                               scale: [1, 1.2, 1],
+                               opacity: [0.1, 0.2, 0.1]
+                             }}
+                             transition={{ duration: 8, repeat: Infinity }}
+                             className="absolute inset-0 bg-stone-900/40 blur-3xl translate-y-20"
+                           />
+                        </div>
+
+                        <motion.div
+                          initial={{ y: 20, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          transition={{ delay: 0.5, duration: 1 }}
+                          className="relative z-10 text-center"
+                        >
+                           <motion.div
+                             animate={{ scale: [1, 1.05, 1] }}
+                             transition={{ duration: 4, repeat: Infinity }}
+                             className="mb-8"
+                           >
+                             <Skull size={120} className="text-torch-orange mx-auto drop-shadow-[0_0_20px_rgba(249,115,22,0.6)]" />
+                           </motion.div>
+                           
+                           <h1 className="font-display text-6xl md:text-8xl lg:text-9xl text-stone-100 tracking-[0.4em] uppercase mb-4 drop-shadow-[0_10px_30px_rgba(0,0,0,1)]">
+                             TRIBAL INDUCTION
+                           </h1>
+                           <motion.p 
+                             initial={{ opacity: 0 }}
+                             animate={{ opacity: 1 }}
+                             transition={{ delay: 1.5, duration: 1 }}
+                             className="font-display text-3xl md:text-4xl text-sand tracking-[0.6em] uppercase opacity-60"
+                           >
+                             BEGINS
+                           </motion.p>
+                        </motion.div>
+
+                        <motion.div 
+                          initial={{ scaleX: 0 }}
+                          animate={{ scaleX: 1 }}
+                          transition={{ delay: 1, duration: 2 }}
+                          className="absolute bottom-1/4 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-transparent via-torch-orange to-transparent" 
+                        />
+                      </motion.div>
+                    );
+                  }
                   
                   // For intro splash
                   if (currentEvent?.type === 'TRIBE_INTRO' && !isAllRevealed) {
