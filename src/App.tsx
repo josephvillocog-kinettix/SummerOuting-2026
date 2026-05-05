@@ -89,16 +89,71 @@ type RevealEvent =
 
 // --- Constants ---
 const TRIBAL_COLORS = [
-  { name: 'Voyagers', value: '#e11d48', icon: 'Flame' as const },
-  { name: 'StormBreakers', value: '#0ea5e9', icon: 'Waves' as const },
-  { name: 'Keepers', value: '#16a34a', icon: 'Palmtree' as const },
-  { name: 'Guardians', value: '#f97316', icon: 'Sun' as const },
-  { name: 'Raiders', value: '#d946ef', icon: 'Skull' as const },
-  { name: 'PathFinders', value: '#57534e', icon: 'Anchor' as const },
+  { name: 'Voyagers', value: '#3ebeb1', icon: 'Flame' as const },
+  { name: 'StormBreakers', value: '#ca3729', icon: 'Waves' as const },
+  { name: 'Keepers', value: '#d2672e', icon: 'Palmtree' as const },
+  { name: 'Guardians', value: '#d3a12a', icon: 'Sun' as const },
+  { name: 'Raiders', value: '#6a4d94', icon: 'Skull' as const },
+  { name: 'PathFinders', value: '#6c7e35', icon: 'Anchor' as const },
 ];
 
 const GENDERS: Gender[] = ['Male', 'Female', 'Other'];
 const CATEGORIES: Category[] = ['Standard', 'Supervisor'];
+
+// --- Silhouettes for Background ---
+const DancingSilhouette = ({ color, delay = 0, scale = 1 }: { color: string; delay?: number; scale?: number }) => (
+  <motion.div
+    initial={{ y: 20, opacity: 0, scale: 0.8 * scale }}
+    animate={{ 
+      y: [0, -30, 0],
+      rotate: [-8, 8, -8],
+      opacity: [0.4, 0.7, 0.4]
+    }}
+    transition={{ 
+      duration: 1.2, 
+      repeat: Infinity, 
+      delay,
+      ease: "easeInOut" 
+    }}
+    className="relative flex flex-col items-center"
+  >
+    {/* Stylized Indigenous silhouette */}
+    <div className="w-6 h-6 rounded-full mb-1" style={{ backgroundColor: color }} />
+    <div className="w-8 h-12 rounded-t-full rounded-b-lg relative" style={{ backgroundColor: color }}>
+      {/* Grass skirt effect */}
+      <div className="absolute bottom-0 w-full h-4 opacity-50 flex justify-between px-1">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="w-1 h-full bg-black/30 rounded-full" />
+        ))}
+      </div>
+    </div>
+    
+    {/* Arms */}
+    <motion.div 
+      animate={{ rotate: [30, -60, 30] }}
+      transition={{ duration: 0.6, repeat: Infinity, delay }}
+      className="absolute top-8 -left-4 w-6 h-1.5 rounded-full origin-right"
+      style={{ backgroundColor: color }}
+    />
+    <motion.div 
+      animate={{ rotate: [-30, 60, -30] }}
+      transition={{ duration: 0.6, repeat: Infinity, delay }}
+      className="absolute top-8 -right-4 w-6 h-1.5 rounded-full origin-left"
+      style={{ backgroundColor: color }}
+    />
+  </motion.div>
+);
+
+const DancingTribeGroup = ({ color, side }: { color: string; side: 'left' | 'right' }) => (
+  <div className={cn(
+    "absolute bottom-0 h-full flex flex-col justify-end gap-8 pb-10 pointer-events-none z-0",
+    side === 'left' ? "-left-24 md:-left-40" : "-right-24 md:-right-40"
+  )}>
+    <DancingSilhouette color={color} delay={0} scale={1.2} />
+    <DancingSilhouette color={color} delay={0.3} scale={0.9} />
+    <DancingSilhouette color={color} delay={0.15} scale={1.1} />
+  </div>
+);
 
 export default function App() {
   const [players, setPlayers] = useState<Player[]>([]);
@@ -195,20 +250,20 @@ export default function App() {
       }
 
       // Initial pause for Tribal Council initiation
-      let delay = 4000;
+      let delay = 2000;
       
       if (revealedCount === -1) {
         delay = 4500; // Time for "Tribal Council Begins" screen
       } else {
         const currentEvent = revealEvents[revealedCount];
         if (currentEvent?.type === 'TRIBE_INTRO') {
-          delay = 4000; // Long pause for tribe intro
+          delay = 3000; // Pause for tribe intro
         } else if (currentEvent?.type === 'PLAYER_REVEAL') {
           const tribe = tribes.find(t => t.playerIds.includes(currentEvent.playerId));
           const isLastInTribe = tribe?.playerIds[tribe.playerIds.length - 1] === currentEvent.playerId;
           
           if (isLastInTribe && revealedCount < total - 1) {
-            delay = 4000; // Pause after tribe is filled
+            delay = 8000; // Longer pause after tribe is filled
           }
         }
       }
@@ -460,7 +515,10 @@ export default function App() {
          <KinettixLogo size={1000} className="rotate-12 translate-x-20 drop-shadow-[0_0_50px_rgba(14,165,233,0.3)]" />
       </div>
       
-      <main className="max-w-7xl mx-auto px-6 relative z-10">
+      <main className={cn(
+        "mx-auto relative z-10 px-6",
+        currentView === 'teams' ? "max-w-none w-[98%]" : "max-w-7xl"
+      )}>
         <AnimatePresence mode="wait">
           {currentView === 'roster' && (
             <motion.div 
@@ -692,22 +750,12 @@ export default function App() {
                 <p className="font-hand text-2xl text-sand italic">
                   "The spirits of the islands have spoken. May your journey be fruitful."
                 </p>
-
-                <div className="mt-8 flex gap-4">
-                  <button 
-                    onClick={exportToExcel}
-                    disabled={revealedCount < revealEvents.length}
-                    className="px-10 py-4 rounded-full bg-stone-900/80 backdrop-blur-sm border-2 border-stone-700 text-stone-300 font-display tracking-[0.2em] text-sm flex items-center gap-3 hover:bg-stone-800 hover:border-lagoon hover:text-lagoon transition-all shadow-xl active:scale-95"
-                  >
-                    <Download size={20} /> SYNC TO SCROLL (EXCEL)
-                  </button>
-                </div>
               </div>
               
               <div className={cn(
                 "w-full transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] relative z-10",
                 revealedCount >= revealEvents.length 
-                  ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 items-start px-4" 
+                  ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start" 
                   : "flex items-center justify-center p-4 md:p-12 mb-20"
               )}>
                 {(() => {
@@ -715,6 +763,10 @@ export default function App() {
                   const isAllRevealed = revealedCount >= totalEvents && totalEvents > 0;
                   
                   const currentEvent = revealedCount >= 0 && revealedCount < totalEvents ? revealEvents[revealedCount] : null;
+
+                  const activeTribe = currentEvent?.type === 'PLAYER_REVEAL' ? tribes.find(t => t.playerIds.includes(currentEvent.playerId)) : null;
+                  const isLastPlayerOfTribe = activeTribe && activeTribe.playerIds[activeTribe.playerIds.length - 1] === currentEvent?.playerId;
+                  const showTribeComplete = isLastPlayerOfTribe && !isAllRevealed;
 
                   // Initial Initiation Splash
                   if (revealedCount === -1 && totalEvents > 0) {
@@ -787,6 +839,8 @@ export default function App() {
                       </motion.div>
                     );
                   }
+
+                  // Tribe Complete Overlay (REMOVED: Now integrated into card background)
                   
                   // For intro splash
                   if (currentEvent?.type === 'TRIBE_INTRO' && !isAllRevealed) {
@@ -1033,6 +1087,9 @@ export default function App() {
 
                     const isFinished = revealedInTribe.length === tribe.playerIds.length && tribe.playerIds.length > 0 && isAllRevealed;
                     const isActiveTribe = tribe.id === activeTribeId;
+                    
+                    const tribeIsFilled = revealedInTribe.length === tribe.playerIds.length && tribe.playerIds.length > 0;
+                    const isShowingCompleteEffect = tribeIsFilled && !isAllRevealed;
 
                     return (
                       <motion.div 
@@ -1064,7 +1121,7 @@ export default function App() {
                         key={tribe.id} 
                         className={cn(
                           "hawaiian-card flex flex-col group border-4 h-full relative overflow-hidden transition-all duration-300",
-                          !isAllRevealed ? "w-full max-w-4xl min-h-[550px]" : "w-full max-w-lg min-h-[280px]",
+                          !isAllRevealed ? "w-full max-w-4xl min-h-[600px]" : "w-full min-h-[280px]",
                           isActiveTribe ? "shadow-2xl scale-[1.02]" : "shadow-lg opacity-90"
                         )}
                         style={{ 
@@ -1073,16 +1130,72 @@ export default function App() {
                         }}
                       >
                       <AnimatePresence>
-                        {isActiveTribe && !isAllRevealed && (
-                          <motion.div 
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: [0, 0.2, 0] }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 1.5, repeat: Infinity }}
-                            className="absolute inset-0 bg-stone-100 mix-blend-overlay pointer-events-none z-50"
-                          />
-                        )}
-                      </AnimatePresence>
+                        {isShowingCompleteEffect && (
+                          <>
+                            {/* Dancing Tribe Silhouettes on the sides */}
+                            <DancingTribeGroup color={tribe.color} side="left" />
+                            <DancingTribeGroup color={tribe.color} side="right" />
+
+                            <motion.div 
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              className="absolute inset-0 pointer-events-none z-0"
+                            >
+                               {/* Fire Effect behind card content */}
+                             <div className="absolute inset-x-0 bottom-0 top-0 overflow-hidden">
+                                {[...Array(30)].map((_, i) => (
+                                  <motion.div
+                                    key={`card-ember-${i}`}
+                                    initial={{ 
+                                      x: Math.random() * 100 + "%", 
+                                      y: "110%", 
+                                      opacity: 0,
+                                      scale: Math.random() * 0.5 + 0.5
+                                    }}
+                                    animate={{ 
+                                      y: ["110%", "-10%"], 
+                                      opacity: [0, 0.8, 0],
+                                      x: (Math.random() * 80 + 10) + "%",
+                                    }}
+                                    transition={{ 
+                                      duration: Math.random() * 3 + 2, 
+                                      repeat: Infinity, 
+                                      delay: Math.random() * 2 
+                                    }}
+                                    className="absolute w-2 h-2 rounded-full"
+                                    style={{ 
+                                      backgroundColor: tribe.color, 
+                                      boxShadow: `0 0 15px ${tribe.color}, 0 0 30px #fff` 
+                                    }}
+                                  />
+                                ))}
+                             </div>
+
+                             {/* Lightning Strikes behind card */}
+                             <motion.div
+                               initial={{ opacity: 0 }}
+                               animate={{ opacity: [0, 1, 0, 0.8, 0] }}
+                               transition={{ 
+                                 duration: 0.3,
+                                 repeat: Infinity,
+                                 repeatDelay: 1.5
+                               }}
+                               className="absolute inset-0 bg-white/10 mix-blend-overlay"
+                             />
+                             
+                             <motion.div
+                               animate={{ 
+                                 opacity: [0, 0.2, 0],
+                                 scale: [1, 1.05, 1]
+                               }}
+                               transition={{ duration: 0.5, repeat: Infinity }}
+                               className="absolute inset-0 bg-stone-100 mix-blend-overlay"
+                             />
+                          </motion.div>
+                        </>
+                      )}
+                    </AnimatePresence>
                       {/* Decorative Background Elements */}
                       <div className="absolute -bottom-8 -right-8 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none -rotate-12">
                          <TikiGuard color={tribe.color} />
