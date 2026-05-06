@@ -97,131 +97,57 @@ const TRIBAL_COLORS = [
   { name: 'PathFinders', value: '#6c7e35', icon: 'Anchor' as const },
 ];
 
+// --- Assets ---
+const TIKI_ASSETS = [
+  "Asset 1.png", "Asset 3.png", "Asset 4.png", "Asset 5.png", 
+  "Asset 6.png", "Asset 7.png", "Asset 8.png", "Asset 9.png", 
+  "Asset 10.png", "Asset 11.png", "Asset 12.png", "Asset 13.png"
+];
+
 const GENDERS: Gender[] = ['Male', 'Female', 'Other'];
 const CATEGORIES: Category[] = ['Standard', 'Supervisor'];
 
-// --- Detailed Tiki Mask (Inspired by User Designs) ---
-const DetailedTikiMask = ({ variant = 1, color, delay = 0, scale = 1 }: { variant?: 1 | 2 | 3; color: string; delay?: number; scale?: number }) => {
-  // Variations inspired by the provided image
-  const configs = [
-    { primary: '#3b82f6', secondary: '#ef4444', accents: '#facc15' }, // Blue/Red/Gold
-    { primary: '#ef4444', secondary: '#10b981', accents: '#f97316' }, // Red/Green/Orange
-    { primary: '#f59e0b', secondary: '#8b5cf6', accents: '#06b6d4' }, // Gold/Purple/Teal
-  ];
+// --- Tiki Mask Wrapper ---
+const DetailedTikiMask = ({ variant = 1, color, delay = 0, scale = 1 }: { variant?: number; color: string; delay?: number; scale?: number }) => {
+  const assetIndex = (variant - 1) % TIKI_ASSETS.length;
+  const assetName = TIKI_ASSETS[assetIndex >= 0 ? assetIndex : 0];
   
-  const theme = configs[(variant - 1) % 3];
-
   return (
     <motion.div
       initial={{ y: 20, opacity: 0, scale: 0.8 * scale }}
       animate={{ 
-        y: [0, -15, 0],
-        rotate: [-3, 3, -3],
-        opacity: [0.8, 1, 0.8]
+        y: [0, -10, 0],
+        rotate: [-2, 2, -2],
+        opacity: [0.9, 1, 0.9]
       }}
       transition={{ 
-        duration: 3 + Math.random(), 
+        duration: 4, 
         repeat: Infinity, 
         delay,
         ease: "easeInOut" 
       }}
       className="relative flex flex-col items-center"
-      style={{ scale }}
     >
-      {/* Feathery Top */}
-      <div className="flex gap-1 -mb-6 relative z-0">
-        {[...Array(5)].map((_, i) => (
-          <motion.div
-            key={i}
-            animate={{ rotate: [i % 2 === 0 ? 5 : -5, i % 2 === 0 ? -5 : 5, i % 2 === 0 ? 5 : -5] }}
-            transition={{ duration: 2, repeat: Infinity, delay: delay + i * 0.1 }}
-            className="w-4 h-12 bg-emerald-600 rounded-t-full border-t-2 border-emerald-400 origin-bottom"
-            style={{ 
-              rotate: (i - 2) * 20,
-              transformOrigin: 'bottom center',
-              boxShadow: 'inset 0 0 10px rgba(0,0,0,0.2)'
-            }}
-          >
-            <div className="w-px h-full bg-emerald-300/30 mx-auto" />
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Main Mask Body */}
+      <img 
+        src={`/assets/${assetName}`} 
+        className="drop-shadow-2xl"
+        style={{ width: 120 * scale, height: 'auto' }}
+        alt="Tiki Mask"
+      />
+      {/* Glow based on color */}
       <div 
-        className="w-20 h-32 rounded-lg border-4 border-stone-900 relative overflow-hidden flex flex-col items-stretch z-10 shadow-2xl"
-        style={{ 
-          backgroundColor: '#4b3621',
-          background: `linear-gradient(135deg, ${theme.primary} 0%, #1a0f05 100%)`, 
-        }}
-      >
-        {/* Intricate Geometric Patterns */}
-        <div className="absolute inset-0 opacity-20 pointer-events-none mix-blend-overlay">
-          <div className="w-full h-full" style={{ backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 10px, white 10px, white 11px), repeating-linear-gradient(90deg, transparent, transparent 10px, white 10px, white 11px)` }} />
-        </div>
-
-        {/* Segmented Forehead */}
-        <div className="h-8 border-b-2 border-stone-900/50 flex justify-around items-center px-2 bg-black/20">
-          <div className="w-3 h-3 rotate-45 border-2 border-white/40" style={{ backgroundColor: theme.accents }} />
-          <div className="w-4 h-4 rotate-45 border-2 border-white/60" style={{ backgroundColor: theme.secondary }} />
-          <div className="w-3 h-3 rotate-45 border-2 border-white/40" style={{ backgroundColor: theme.accents }} />
-        </div>
-
-        {/* Eyes - Slanted and Colorful */}
-        <div className="flex justify-between w-full mt-4 px-2">
-          <div className="w-7 h-10 bg-stone-950 rounded-lg -rotate-12 border-2 border-stone-800 flex items-center justify-center relative overflow-hidden">
-            <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/20 to-transparent" />
-            <motion.div 
-              animate={{ opacity: [0.4, 0.8, 0.4] }}
-              transition={{ duration: 2, repeat: Infinity, delay }}
-              className="w-4 h-4 rounded-full blur-[2px]"
-              style={{ backgroundColor: color }}
-            />
-          </div>
-          <div className="w-7 h-10 bg-stone-950 rounded-lg rotate-12 border-2 border-stone-800 flex items-center justify-center relative overflow-hidden">
-            <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/20 to-transparent" />
-            <motion.div 
-              animate={{ opacity: [0.4, 0.8, 0.4] }}
-              transition={{ duration: 2, repeat: Infinity, delay: delay + 0.5 }}
-              className="w-4 h-4 rounded-full blur-[2px]"
-              style={{ backgroundColor: color }}
-            />
-          </div>
-        </div>
-
-        {/* Prominent Nose */}
-        <div className="w-4 h-10 mx-auto -mt-2 bg-stone-900 border-x-2 border-t-2 border-stone-800 shadow-xl relative z-20 rounded-t-sm" />
-
-        {/* Wide Grinning Mouth with Teeth */}
-        <div 
-          className="w-16 h-10 bg-stone-950 mx-auto mt-0 rounded-b-2xl border-x-2 border-b-4 border-stone-900 relative overflow-hidden flex flex-col justify-center items-center"
-          style={{ borderTop: `4px solid ${theme.secondary}` }}
-        >
-          {/* Teeth Row */}
-          <div className="flex gap-0.5 mt-1">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="w-1.5 h-4 bg-stone-100/80 rounded-sm border-b border-stone-400" />
-            ))}
-          </div>
-          {/* Lower Jawline detail */}
-          <div className="w-10 h-1 bg-red-900/40 rounded-full mt-1" />
-        </div>
-      </div>
-
-      {/* Decorative Base */}
-      <div className="w-12 h-6 bg-[#2a1b0a] -mt-1 border-x-4 border-b-4 border-stone-900 rounded-b-xl flex justify-around items-center px-1">
-         <div className="w-2 h-2 rounded-full bg-white/10" />
-         <div className="w-2 h-2 rounded-full bg-white/10" />
-         <div className="w-2 h-2 rounded-full bg-white/10" />
-      </div>
+        className="absolute inset-0 blur-2xl opacity-20 pointer-events-none rounded-full"
+        style={{ backgroundColor: color }}
+      />
     </motion.div>
   );
 };
 
+
 // --- Silhouettes for Background ---
 const RealisticTikiMask = ({ color, delay = 0, scale = 1 }: { color: string; delay?: number; scale?: number }) => (
   // Use the new DetailedTikiMask for consistency
-  <DetailedTikiMask color={color} delay={delay} scale={scale} variant={(Math.floor(delay * 10) % 3 + 1) as any} />
+  <DetailedTikiMask color={color} delay={delay} scale={scale} variant={(Math.floor(delay * 17) % TIKI_ASSETS.length + 1)} />
 );
 
 const DancingTribeGroup = ({ color, side }: { color: string; side: 'left' | 'right' }) => (
@@ -606,6 +532,10 @@ export default function App() {
                 <div className="absolute top-0 right-0 p-4 opacity-10">
                    <Flower size={64} className="text-hibiscus animate-sway" />
                 </div>
+                {/* Addition: Floating Assets in Tribe Setup side */}
+                <div className="absolute top-20 -left-10 opacity-20 pointer-events-none">
+                   <DetailedTikiMask variant={5} color="#0ea5e9" scale={0.8} />
+                </div>
                 <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-transparent via-lagoon to-transparent" />
                 <div className="flex items-center justify-between mb-8 relative z-10">
                   <h2 className="tribal-header text-4xl flex items-center gap-3">
@@ -662,6 +592,10 @@ export default function App() {
                 </div>
                 <div className="absolute -bottom-10 -left-10 opacity-10 pointer-events-none">
                    <Waves size={180} className="text-ocean-blue" />
+                </div>
+                {/* Addition: Floating Asset in Applicants section */}
+                <div className="absolute top-1/2 -right-8 opacity-20 pointer-events-none rotate-12">
+                   <DetailedTikiMask variant={7} color="#ef4444" scale={0.7} />
                 </div>
                 
                 <h2 className="tribal-header text-4xl mb-10 flex items-center gap-4 relative z-10">
@@ -800,6 +734,55 @@ export default function App() {
               animate={{ opacity: 1 }}
               className="min-h-[70vh] flex flex-col items-center relative"
             >
+              {/* Floating Dancing Side Masks during fill process */}
+              {revealEvents.length > 0 && revealedCount < revealEvents.length && (
+                <>
+                  <div className="fixed left-4 top-1/2 -translate-y-1/2 z-[100] pointer-events-none hidden xl:flex flex-col gap-12">
+                     <motion.div
+                       animate={{ 
+                         y: [0, -30, 0],
+                         rotate: [-5, 5, -5],
+                         scale: [1, 1.1, 1]
+                       }}
+                       transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                     >
+                        <DetailedTikiMask variant={1} color="#f59e0b" scale={1.8} delay={0} />
+                     </motion.div>
+                     <motion.div
+                       animate={{ 
+                         y: [0, 30, 0],
+                         rotate: [5, -5, 5],
+                         scale: [1, 0.9, 1]
+                       }}
+                       transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                     >
+                        <DetailedTikiMask variant={3} color="#ef4444" scale={1.4} delay={0.2} />
+                     </motion.div>
+                  </div>
+                  <div className="fixed right-4 top-1/2 -translate-y-1/2 z-[100] pointer-events-none hidden xl:flex flex-col gap-12">
+                     <motion.div
+                       animate={{ 
+                         y: [0, 40, 0],
+                         rotate: [10, -10, 10],
+                         scale: [1, 1.05, 1]
+                       }}
+                       transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
+                     >
+                        <DetailedTikiMask variant={7} color="#3b82f6" scale={1.8} delay={0.1} />
+                     </motion.div>
+                     <motion.div
+                       animate={{ 
+                         y: [0, -40, 0],
+                         rotate: [-10, 10, -10],
+                         scale: [1, 1.15, 1]
+                       }}
+                       transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 0.8 }}
+                     >
+                        <DetailedTikiMask variant={12} color="#10b981" scale={1.4} delay={0.4} />
+                     </motion.div>
+                  </div>
+                </>
+              )}
               <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-10">
                 <Waves className="absolute top-10 left-10 w-64 h-64 text-ocean-blue rotate-12" />
                 <Waves className="absolute bottom-10 right-10 w-64 h-64 text-lagoon -rotate-12" />
@@ -810,7 +793,7 @@ export default function App() {
                 <div className="flex items-center gap-4 mb-2">
                    <Flower className="text-hibiscus animate-pulse" size={32} />
                    <h2 className="font-display text-5xl text-stone-100 tracking-[0.2em] drop-shadow-xl">
-                      ALOHA TRIBES
+                      ALOHA KINETTIX
                    </h2>
                    <Flower className="text-hibiscus animate-pulse" size={32} />
                 </div>
@@ -920,12 +903,12 @@ export default function App() {
                         className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-stone-950/80 backdrop-blur-md"
                       >
                         {/* Celebration Dancing Group */}
-                        <div className="absolute inset-0 flex items-end justify-around pb-20 opacity-40">
-                          <RealisticTikiMask color="#f59e0b" delay={0} scale={1.5} />
-                          <RealisticTikiMask color="#ef4444" delay={0.2} scale={1.3} />
-                          <RealisticTikiMask color="#3b82f6" delay={0.4} scale={1.6} />
-                          <RealisticTikiMask color="#10b981" delay={0.1} scale={1.4} />
-                          <RealisticTikiMask color="#8b5cf6" delay={0.3} scale={1.5} />
+                        <div className="absolute inset-0 flex items-end justify-around pb-20 opacity-40 px-20">
+                          <DetailedTikiMask variant={3} color="#f59e0b" delay={0} scale={1.5} />
+                          <DetailedTikiMask variant={6} color="#ef4444" delay={0.2} scale={1.3} />
+                          <DetailedTikiMask variant={8} color="#3b82f6" delay={0.4} scale={1.6} />
+                          <DetailedTikiMask variant={11} color="#10b981" delay={0.1} scale={1.4} />
+                          <DetailedTikiMask variant={12} color="#8b5cf6" delay={0.3} scale={1.5} />
                         </div>
 
                         <motion.div
@@ -996,6 +979,7 @@ export default function App() {
                   if (currentEvent?.type === 'TRIBE_INTRO' && !isAllRevealed) {
                     const tribe = tribes.find(t => t.id === currentEvent.tribeId);
                     if (!tribe) return null;
+                    const tribeIndex = tribes.findIndex(t => t.id === tribe.id);
                     return (
                       <motion.div 
                         initial={{ opacity: 0 }}
@@ -1139,35 +1123,56 @@ export default function App() {
                           initial={{ scale: 0.5, opacity: 0, rotate: -10 }}
                           animate={{ scale: 1, opacity: 1, rotate: 0 }}
                           transition={{ type: "spring", damping: 15, stiffness: 100 }}
-                          className="relative mb-12 z-10"
+                          className="relative mb-12 z-10 flex items-center gap-12"
                         >
-                           <div 
-                             className="absolute inset-0 blur-[100px] opacity-60 rounded-full" 
-                             style={{ backgroundColor: tribe.color }} 
-                           />
-                           <div className="relative p-12 bg-stone-900 border-8 border-stone-800 rounded-full shadow-[0_0_100px_rgba(0,0,0,0.8)]">
-                              <TribeIconComponent icon={tribe.icon} size={160} style={{ color: tribe.color }} className="drop-shadow-[0_0_30px_rgba(0,0,0,0.8)]" />
-                           </div>
-                           
-                           {/* Animated rings */}
-                           {[...Array(3)].map((_, i) => (
-                             <motion.div 
-                               key={i}
-                               animate={{ 
-                                 scale: [1, 1.5], 
-                                 opacity: [0.5, 0],
-                                 rotate: i % 2 === 0 ? 360 : -360
-                               }}
-                               transition={{ 
-                                 duration: 3, 
-                                 repeat: Infinity, 
-                                 delay: i * 1,
-                                 ease: "easeOut"
-                               }}
-                               className="absolute -inset-8 border-4 rounded-full"
-                               style={{ borderColor: tribe.color, borderStyle: i === 1 ? 'dashed' : 'solid' }}
+                           {/* Side Assets for Tribe Intro - Dynamic variants to avoid duplicates */}
+                           <motion.div
+                             initial={{ x: -100, opacity: 0 }}
+                             animate={{ x: 0, opacity: 1 }}
+                             transition={{ delay: 0.6, duration: 1 }}
+                             className="hidden lg:block opacity-40 hover:opacity-100 transition-opacity"
+                           >
+                              <DetailedTikiMask variant={(tribeIndex * 2) % TIKI_ASSETS.length + 1} color={tribe.color} scale={1.2} />
+                           </motion.div>
+
+                           <div className="relative">
+                             <div 
+                               className="absolute inset-0 blur-[100px] opacity-60 rounded-full" 
+                               style={{ backgroundColor: tribe.color }} 
                              />
-                           ))}
+                             <div className="relative p-12 bg-stone-900 border-8 border-stone-800 rounded-full shadow-[0_0_100px_rgba(0,0,0,0.8)]">
+                                <TribeIconComponent icon={tribe.icon} size={160} style={{ color: tribe.color }} className="drop-shadow-[0_0_30px_rgba(0,0,0,0.8)]" />
+                             </div>
+                             
+                             {/* Animated rings */}
+                             {[...Array(3)].map((_, i) => (
+                               <motion.div 
+                                 key={i}
+                                 animate={{ 
+                                   scale: [1, 1.5], 
+                                   opacity: [0.5, 0],
+                                   rotate: i % 2 === 0 ? 360 : -360
+                                 }}
+                                 transition={{ 
+                                   duration: 3, 
+                                   repeat: Infinity, 
+                                   delay: i * 1,
+                                   ease: "easeOut"
+                                 }}
+                                 className="absolute -inset-8 border-4 rounded-full"
+                                 style={{ borderColor: tribe.color, borderStyle: i === 1 ? 'dashed' : 'solid' }}
+                               />
+                             ))}
+                           </div>
+
+                           <motion.div
+                             initial={{ x: 100, opacity: 0 }}
+                             animate={{ x: 0, opacity: 1 }}
+                             transition={{ delay: 0.8, duration: 1 }}
+                             className="hidden lg:block opacity-40 hover:opacity-100 transition-opacity"
+                           >
+                              <DetailedTikiMask variant={(tribeIndex * 2 + 1) % TIKI_ASSETS.length + 1} color={tribe.color} scale={1.2} />
+                           </motion.div>
                         </motion.div>
                         
                         <div className="relative z-10 text-center">
@@ -1480,6 +1485,11 @@ export default function App() {
                      <Waves className="text-ocean-blue" size={20} />
                      <span className="font-hand text-2xl text-sand italic">"The rosters are set. The challenge awaits."</span>
                   </div>
+                </div>
+                {/* Addition: Assets in Tribes Summary header */}
+                <div className="flex gap-8 items-center mr-8 hidden lg:flex">
+                   <DetailedTikiMask variant={9} color="#d3a12a" scale={0.8} />
+                   <DetailedTikiMask variant={10} color="#6a4d94" scale={0.8} />
                 </div>
                 <div className="flex gap-4">
                   <button 
