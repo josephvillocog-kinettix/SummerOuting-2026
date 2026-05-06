@@ -100,58 +100,138 @@ const TRIBAL_COLORS = [
 const GENDERS: Gender[] = ['Male', 'Female', 'Other'];
 const CATEGORIES: Category[] = ['Standard', 'Supervisor'];
 
-// --- Silhouettes for Background ---
-const DancingSilhouette = ({ color, delay = 0, scale = 1 }: { color: string; delay?: number; scale?: number }) => (
-  <motion.div
-    initial={{ y: 20, opacity: 0, scale: 0.8 * scale }}
-    animate={{ 
-      y: [0, -30, 0],
-      rotate: [-8, 8, -8],
-      opacity: [0.4, 0.7, 0.4]
-    }}
-    transition={{ 
-      duration: 1.2, 
-      repeat: Infinity, 
-      delay,
-      ease: "easeInOut" 
-    }}
-    className="relative flex flex-col items-center"
-  >
-    {/* Stylized Indigenous silhouette */}
-    <div className="w-6 h-6 rounded-full mb-1" style={{ backgroundColor: color }} />
-    <div className="w-8 h-12 rounded-t-full rounded-b-lg relative" style={{ backgroundColor: color }}>
-      {/* Grass skirt effect */}
-      <div className="absolute bottom-0 w-full h-4 opacity-50 flex justify-between px-1">
-        {[...Array(3)].map((_, i) => (
-          <div key={i} className="w-1 h-full bg-black/30 rounded-full" />
+// --- Detailed Tiki Mask (Inspired by User Designs) ---
+const DetailedTikiMask = ({ variant = 1, color, delay = 0, scale = 1 }: { variant?: 1 | 2 | 3; color: string; delay?: number; scale?: number }) => {
+  // Variations inspired by the provided image
+  const configs = [
+    { primary: '#3b82f6', secondary: '#ef4444', accents: '#facc15' }, // Blue/Red/Gold
+    { primary: '#ef4444', secondary: '#10b981', accents: '#f97316' }, // Red/Green/Orange
+    { primary: '#f59e0b', secondary: '#8b5cf6', accents: '#06b6d4' }, // Gold/Purple/Teal
+  ];
+  
+  const theme = configs[(variant - 1) % 3];
+
+  return (
+    <motion.div
+      initial={{ y: 20, opacity: 0, scale: 0.8 * scale }}
+      animate={{ 
+        y: [0, -15, 0],
+        rotate: [-3, 3, -3],
+        opacity: [0.8, 1, 0.8]
+      }}
+      transition={{ 
+        duration: 3 + Math.random(), 
+        repeat: Infinity, 
+        delay,
+        ease: "easeInOut" 
+      }}
+      className="relative flex flex-col items-center"
+      style={{ scale }}
+    >
+      {/* Feathery Top */}
+      <div className="flex gap-1 -mb-6 relative z-0">
+        {[...Array(5)].map((_, i) => (
+          <motion.div
+            key={i}
+            animate={{ rotate: [i % 2 === 0 ? 5 : -5, i % 2 === 0 ? -5 : 5, i % 2 === 0 ? 5 : -5] }}
+            transition={{ duration: 2, repeat: Infinity, delay: delay + i * 0.1 }}
+            className="w-4 h-12 bg-emerald-600 rounded-t-full border-t-2 border-emerald-400 origin-bottom"
+            style={{ 
+              rotate: (i - 2) * 20,
+              transformOrigin: 'bottom center',
+              boxShadow: 'inset 0 0 10px rgba(0,0,0,0.2)'
+            }}
+          >
+            <div className="w-px h-full bg-emerald-300/30 mx-auto" />
+          </motion.div>
         ))}
       </div>
-    </div>
-    
-    {/* Arms */}
-    <motion.div 
-      animate={{ rotate: [30, -60, 30] }}
-      transition={{ duration: 0.6, repeat: Infinity, delay }}
-      className="absolute top-8 -left-4 w-6 h-1.5 rounded-full origin-right"
-      style={{ backgroundColor: color }}
-    />
-    <motion.div 
-      animate={{ rotate: [-30, 60, -30] }}
-      transition={{ duration: 0.6, repeat: Infinity, delay }}
-      className="absolute top-8 -right-4 w-6 h-1.5 rounded-full origin-left"
-      style={{ backgroundColor: color }}
-    />
-  </motion.div>
+
+      {/* Main Mask Body */}
+      <div 
+        className="w-20 h-32 rounded-lg border-4 border-stone-900 relative overflow-hidden flex flex-col items-stretch z-10 shadow-2xl"
+        style={{ 
+          backgroundColor: '#4b3621',
+          background: `linear-gradient(135deg, ${theme.primary} 0%, #1a0f05 100%)`, 
+        }}
+      >
+        {/* Intricate Geometric Patterns */}
+        <div className="absolute inset-0 opacity-20 pointer-events-none mix-blend-overlay">
+          <div className="w-full h-full" style={{ backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 10px, white 10px, white 11px), repeating-linear-gradient(90deg, transparent, transparent 10px, white 10px, white 11px)` }} />
+        </div>
+
+        {/* Segmented Forehead */}
+        <div className="h-8 border-b-2 border-stone-900/50 flex justify-around items-center px-2 bg-black/20">
+          <div className="w-3 h-3 rotate-45 border-2 border-white/40" style={{ backgroundColor: theme.accents }} />
+          <div className="w-4 h-4 rotate-45 border-2 border-white/60" style={{ backgroundColor: theme.secondary }} />
+          <div className="w-3 h-3 rotate-45 border-2 border-white/40" style={{ backgroundColor: theme.accents }} />
+        </div>
+
+        {/* Eyes - Slanted and Colorful */}
+        <div className="flex justify-between w-full mt-4 px-2">
+          <div className="w-7 h-10 bg-stone-950 rounded-lg -rotate-12 border-2 border-stone-800 flex items-center justify-center relative overflow-hidden">
+            <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/20 to-transparent" />
+            <motion.div 
+              animate={{ opacity: [0.4, 0.8, 0.4] }}
+              transition={{ duration: 2, repeat: Infinity, delay }}
+              className="w-4 h-4 rounded-full blur-[2px]"
+              style={{ backgroundColor: color }}
+            />
+          </div>
+          <div className="w-7 h-10 bg-stone-950 rounded-lg rotate-12 border-2 border-stone-800 flex items-center justify-center relative overflow-hidden">
+            <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/20 to-transparent" />
+            <motion.div 
+              animate={{ opacity: [0.4, 0.8, 0.4] }}
+              transition={{ duration: 2, repeat: Infinity, delay: delay + 0.5 }}
+              className="w-4 h-4 rounded-full blur-[2px]"
+              style={{ backgroundColor: color }}
+            />
+          </div>
+        </div>
+
+        {/* Prominent Nose */}
+        <div className="w-4 h-10 mx-auto -mt-2 bg-stone-900 border-x-2 border-t-2 border-stone-800 shadow-xl relative z-20 rounded-t-sm" />
+
+        {/* Wide Grinning Mouth with Teeth */}
+        <div 
+          className="w-16 h-10 bg-stone-950 mx-auto mt-0 rounded-b-2xl border-x-2 border-b-4 border-stone-900 relative overflow-hidden flex flex-col justify-center items-center"
+          style={{ borderTop: `4px solid ${theme.secondary}` }}
+        >
+          {/* Teeth Row */}
+          <div className="flex gap-0.5 mt-1">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="w-1.5 h-4 bg-stone-100/80 rounded-sm border-b border-stone-400" />
+            ))}
+          </div>
+          {/* Lower Jawline detail */}
+          <div className="w-10 h-1 bg-red-900/40 rounded-full mt-1" />
+        </div>
+      </div>
+
+      {/* Decorative Base */}
+      <div className="w-12 h-6 bg-[#2a1b0a] -mt-1 border-x-4 border-b-4 border-stone-900 rounded-b-xl flex justify-around items-center px-1">
+         <div className="w-2 h-2 rounded-full bg-white/10" />
+         <div className="w-2 h-2 rounded-full bg-white/10" />
+         <div className="w-2 h-2 rounded-full bg-white/10" />
+      </div>
+    </motion.div>
+  );
+};
+
+// --- Silhouettes for Background ---
+const RealisticTikiMask = ({ color, delay = 0, scale = 1 }: { color: string; delay?: number; scale?: number }) => (
+  // Use the new DetailedTikiMask for consistency
+  <DetailedTikiMask color={color} delay={delay} scale={scale} variant={(Math.floor(delay * 10) % 3 + 1) as any} />
 );
 
 const DancingTribeGroup = ({ color, side }: { color: string; side: 'left' | 'right' }) => (
   <div className={cn(
-    "absolute bottom-0 h-full flex flex-col justify-end gap-8 pb-10 pointer-events-none z-0",
-    side === 'left' ? "-left-24 md:-left-40" : "-right-24 md:-right-40"
+    "absolute bottom-0 h-full flex flex-col justify-end gap-16 pb-10 pointer-events-none z-0",
+    side === 'left' ? "-left-28 md:-left-44" : "-right-28 md:-right-44"
   )}>
-    <DancingSilhouette color={color} delay={0} scale={1.2} />
-    <DancingSilhouette color={color} delay={0.3} scale={0.9} />
-    <DancingSilhouette color={color} delay={0.15} scale={1.1} />
+    <RealisticTikiMask color={color} delay={0} scale={1.2} />
+    <RealisticTikiMask color={color} delay={0.8} scale={0.9} />
+    <RealisticTikiMask color={color} delay={0.4} scale={1.1} />
   </div>
 );
 
@@ -187,29 +267,50 @@ export default function App() {
   const generateTribes = () => {
     if (tribes.length === 0 || players.length === 0) return;
 
-    // Create composite buckets for maximum balance
-    const buckets: Record<string, Player[]> = {};
-    GENDERS.forEach(g => {
-      CATEGORIES.forEach(c => {
-        buckets[`${g}-${c}`] = players.filter(p => p.gender === g && p.category === c);
-      });
+    // 1. Group players by Supervisor Name
+    const supervisorGroups: Record<string, Player[]> = {};
+    players.forEach(p => {
+      const key = (p.supervisorName || 'No Supervisor').trim().toLowerCase();
+      if (!supervisorGroups[key]) supervisorGroups[key] = [];
+      supervisorGroups[key].push(p);
     });
 
     const shuffle = <T,>(array: T[]) => [...array].sort(() => Math.random() - 0.5);
-    const shuffledBuckets: Record<string, Player[]> = {};
-    Object.keys(buckets).forEach(key => {
-      shuffledBuckets[key] = shuffle(buckets[key]);
+    
+    // 2. Prepare buckets within each supervisor group for gender balance
+    const sortedSupervisors = Object.keys(supervisorGroups).sort();
+    const buckets: Player[][] = [];
+
+    sortedSupervisors.forEach(sup => {
+      const group = supervisorGroups[sup];
+      // Further divide by gender within supervisor group
+      const males = shuffle(group.filter(p => p.gender === 'Male'));
+      const females = shuffle(group.filter(p => p.gender === 'Female'));
+      const others = shuffle(group.filter(p => p.gender === 'Other'));
+
+      // Interleave them to distribute gender equally too
+      const interleaved: Player[] = [];
+      const maxLength = Math.max(males.length, females.length, others.length);
+      for (let i = 0; i < maxLength; i++) {
+        if (males[i]) interleaved.push(males[i]);
+        if (females[i]) interleaved.push(females[i]);
+        if (others[i]) interleaved.push(others[i]);
+      }
+      buckets.push(interleaved);
     });
 
     const newTribes = tribes.map(t => ({ ...t, playerIds: [] as string[] }));
-
     let tribeIndex = 0;
-    // Distribute from each bucket
-    Object.keys(shuffledBuckets).forEach(key => {
-      shuffledBuckets[key].forEach(player => {
+
+    // 3. Process each supervisor bucket round-robin
+    // To TRULY balance, we distribute players across the tribes
+    // We want the subordinates of one supervisor to be spread out.
+    buckets.forEach(groupPlayers => {
+      groupPlayers.forEach(player => {
         newTribes[tribeIndex].playerIds.push(player.id);
         tribeIndex = (tribeIndex + 1) % newTribes.length;
       });
+      // We don't reset tribeIndex between supervisors to ensure teams overall sizes are equal
     });
 
     // Create an ordered sequence of events: Tribe Intro -> Players in Tribe -> next...
@@ -373,61 +474,25 @@ export default function App() {
   };
 
   const TikiGuard = ({ color }: { color: string }) => (
-    <div className="relative w-28 h-44 flex flex-col items-center justify-end group">
-      {/* Torch */}
-      <div className="absolute -top-6 -left-3 z-20">
-        <Flame className="w-10 h-10 text-torch-orange torch-flicker filter drop-shadow-[0_0_10px_rgba(249,115,22,0.8)]" />
-        <div className="w-1.5 h-16 bg-[#451a03] mx-auto rounded-full mt-1 border-x border-stone-900" />
-      </div>
-      
-      {/* Decorative Leis/Flowers */}
-      <div className="absolute top-1/3 -right-6 z-30 animate-sway opacity-60">
-        <Flower className="w-8 h-8 text-hibiscus" />
-      </div>
-      <div className="absolute top-1/4 -left-6 z-30 animate-sway opacity-40 delay-1000">
-        <Flower className="w-6 h-6 text-lagoon" />
+    <div className="relative flex flex-col items-center justify-end group">
+      {/* Background Glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-64 bg-amber-500/10 blur-[60px] rounded-full pointer-events-none" />
+
+      {/* Torches - Symmetrical */}
+      <div className="absolute -top-12 -left-16 z-20">
+        <Flame className="w-12 h-12 text-torch-orange torch-flicker filter drop-shadow-[0_0_15px_rgba(249,115,22,0.9)]" />
+        <div className="w-2 h-24 bg-gradient-to-b from-[#451a03] to-[#1a0f05] mx-auto rounded-full mt-1 border-x border-stone-900" />
       </div>
 
-      {/* Head - More Hawaiian Style */}
-      <div className="w-18 h-24 bg-stone-800 rounded-t-3xl border-4 border-stone-900 flex flex-col items-center pt-4 gap-2 relative shadow-2xl overflow-hidden">
-         {/* Tribal Markings */}
-         <div className="absolute top-0 w-full h-full opacity-10 pointer-events-none">
-            <div className="polynesian-pattern w-full h-full" />
-         </div>
-         
-         <div className="absolute -top-3 w-24 flex justify-between px-1">
-            <Palmtree className="w-7 h-7 text-emerald-600 -rotate-12" />
-            <Palmtree className="w-7 h-7 text-emerald-600 rotate-12" />
-         </div>
-         
-         {/* Glowing Eyes */}
-         <div className="flex gap-5 mt-1">
-            <div className="w-4 h-4 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_15px_rgba(34,211,238,0.9)]" />
-            <div className="w-4 h-4 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_15px_rgba(34,211,238,0.9)]" />
-         </div>
-         
-         {/* Large Mouth */}
-         <div className="w-10 h-6 bg-stone-950 rounded-b-xl border-t-2 border-stone-700 flex flex-col items-center justify-center overflow-hidden">
-            <div className="flex gap-0.5">
-               <div className="w-1 h-3 bg-stone-200/20" />
-               <div className="w-1 h-3 bg-stone-200/20" />
-               <div className="w-1 h-3 bg-stone-200/20" />
-            </div>
-         </div>
+      <div className="absolute -top-12 -right-16 z-20">
+        <Flame className="w-12 h-12 text-torch-orange torch-flicker filter drop-shadow-[0_0_15px_rgba(249,115,22,0.9)] scale-x-[-1]" />
+        <div className="w-2 h-24 bg-gradient-to-b from-[#451a03] to-[#1a0f05] mx-auto rounded-full mt-1 border-x border-stone-900" />
       </div>
       
-      {/* Body */}
-      <div className="w-16 h-18 bg-stone-800 border-x-4 border-b-4 border-stone-900 rounded-b-xl flex flex-col items-center p-2 relative">
-         <div className="absolute inset-0 flex items-center justify-center opacity-30 mt-2">
-            <Shield size={28} style={{ color }} className="animate-pulse" />
-         </div>
-         <div className="w-full h-1 bg-stone-700/50 rounded-full mt-2" />
-         <div className="w-full h-1 bg-stone-700/50 rounded-full mt-1" />
-         <div className="w-full h-1 bg-stone-700/50 rounded-full mt-1" />
+      {/* The Updated Mask */}
+      <div className="transform scale-[2.2] origin-bottom mb-4">
+        <DetailedTikiMask variant={2} color={color} scale={1} />
       </div>
-      
-      {/* Base/Shadow */}
-      <div className="w-24 h-6 bg-black rounded-full blur-md -mb-3 opacity-60" />
     </div>
   );
 
@@ -856,11 +921,11 @@ export default function App() {
                       >
                         {/* Celebration Dancing Group */}
                         <div className="absolute inset-0 flex items-end justify-around pb-20 opacity-40">
-                          <DancingSilhouette color="#f59e0b" delay={0} scale={1.5} />
-                          <DancingSilhouette color="#ef4444" delay={0.2} scale={1.3} />
-                          <DancingSilhouette color="#3b82f6" delay={0.4} scale={1.6} />
-                          <DancingSilhouette color="#10b981" delay={0.1} scale={1.4} />
-                          <DancingSilhouette color="#8b5cf6" delay={0.3} scale={1.5} />
+                          <RealisticTikiMask color="#f59e0b" delay={0} scale={1.5} />
+                          <RealisticTikiMask color="#ef4444" delay={0.2} scale={1.3} />
+                          <RealisticTikiMask color="#3b82f6" delay={0.4} scale={1.6} />
+                          <RealisticTikiMask color="#10b981" delay={0.1} scale={1.4} />
+                          <RealisticTikiMask color="#8b5cf6" delay={0.3} scale={1.5} />
                         </div>
 
                         <motion.div
