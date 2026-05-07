@@ -108,9 +108,9 @@ const GENDERS: Gender[] = ['Male', 'Female', 'Other'];
 const CATEGORIES: Category[] = ['Standard', 'Supervisor'];
 
 // --- Tiki Mask Wrapper ---
-const DetailedTikiMask = ({ variant = 1, color, delay = 0, scale = 1 }: { variant?: number; color: string; delay?: number; scale?: number }) => {
+const DetailedTikiMask = ({ variant = 1, color, delay = 0, scale = 1, assetName: forcedAssetName }: { variant?: number; color: string; delay?: number; scale?: number; assetName?: string }) => {
   const assetIndex = (variant - 1) % TIKI_ASSETS.length;
-  const assetName = TIKI_ASSETS[assetIndex >= 0 ? assetIndex : 0];
+  const assetName = forcedAssetName || TIKI_ASSETS[assetIndex >= 0 ? assetIndex : 0];
   
   return (
     <motion.div
@@ -1138,7 +1138,7 @@ export default function App() {
                              transition={{ delay: 0.6, duration: 1 }}
                              className="hidden lg:block opacity-30 hover:opacity-80 transition-opacity"
                            >
-                              <DetailedTikiMask variant={(tribeIndex * 2) % TIKI_ASSETS.length + 1} color={tribe.color} scale={0.7} />
+                              <DetailedTikiMask assetName={tribe.icon} color={tribe.color} scale={1.0} />
                            </motion.div>
 
                            <div className="relative">
@@ -1177,7 +1177,7 @@ export default function App() {
                              transition={{ delay: 0.8, duration: 1 }}
                              className="hidden lg:block opacity-30 hover:opacity-80 transition-opacity"
                            >
-                              <DetailedTikiMask variant={(tribeIndex * 2 + 1) % TIKI_ASSETS.length + 1} color={tribe.color} scale={0.7} />
+                              <DetailedTikiMask assetName={tribe.icon} color={tribe.color} scale={1.0} />
                            </motion.div>
                         </motion.div>
                         
