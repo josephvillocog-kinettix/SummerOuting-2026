@@ -78,7 +78,7 @@ interface Tribe {
   name: string;
   color: string;
   playerIds: string[];
-  icon: 'Flame' | 'Waves' | 'Palmtree' | 'Sun' | 'Skull' | 'Anchor';
+  icon: string;
 }
 
 type View = 'teams' | 'compose' | 'roster' | 'outplay';
@@ -89,12 +89,12 @@ type RevealEvent =
 
 // --- Constants ---
 const TRIBAL_COLORS = [
-  { name: 'Voyagers', value: '#3ebeb1', icon: 'Flame' as const },
-  { name: 'StormBreakers', value: '#ca3729', icon: 'Waves' as const },
-  { name: 'Keepers', value: '#d2672e', icon: 'Palmtree' as const },
-  { name: 'Guardians', value: '#d3a12a', icon: 'Sun' as const },
-  { name: 'Raiders', value: '#6a4d94', icon: 'Skull' as const },
-  { name: 'PathFinders', value: '#6c7e35', icon: 'Anchor' as const },
+  { name: 'Voyagers', value: '#3ebeb1', icon: 'Asset 1.png' },
+  { name: 'StormBreakers', value: '#ca3729', icon: 'Asset 3.png' },
+  { name: 'Keepers', value: '#d2672e', icon: 'Asset 4.png' },
+  { name: 'Guardians', value: '#d3a12a', icon: 'Asset 5.png' },
+  { name: 'Raiders', value: '#6a4d94', icon: 'Asset 6.png' },
+  { name: 'PathFinders', value: '#6c7e35', icon: 'Asset 7.png' },
 ];
 
 // --- Assets ---
@@ -388,6 +388,16 @@ export default function App() {
   );
 
   const TribeIconComponent = ({ icon, size = 24, className, style }: { icon: string, size?: number, className?: string, style?: any }) => {
+    if (icon && icon.startsWith('Asset')) {
+      return (
+        <img 
+          src={`/assets/${icon}`} 
+          style={{ ...style, width: size, height: size, objectFit: 'contain' }} 
+          className={cn("drop-shadow-md", className)}
+          alt="Tribe Symbol"
+        />
+      );
+    }
     switch (icon) {
       case 'Flame': return <Flame size={size} className={className} style={style} />;
       case 'Waves': return <Waves size={size} className={className} style={style} />;
@@ -533,8 +543,8 @@ export default function App() {
                    <Flower size={64} className="text-hibiscus animate-sway" />
                 </div>
                 {/* Addition: Floating Assets in Tribe Setup side */}
-                <div className="absolute top-20 -left-10 opacity-20 pointer-events-none">
-                   <DetailedTikiMask variant={5} color="#0ea5e9" scale={0.8} />
+                <div className="absolute top-20 -left-10 opacity-10 pointer-events-none">
+                   <DetailedTikiMask variant={5} color="#0ea5e9" scale={0.4} />
                 </div>
                 <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-transparent via-lagoon to-transparent" />
                 <div className="flex items-center justify-between mb-8 relative z-10">
@@ -594,8 +604,8 @@ export default function App() {
                    <Waves size={180} className="text-ocean-blue" />
                 </div>
                 {/* Addition: Floating Asset in Applicants section */}
-                <div className="absolute top-1/2 -right-8 opacity-20 pointer-events-none rotate-12">
-                   <DetailedTikiMask variant={7} color="#ef4444" scale={0.7} />
+                <div className="absolute top-1/2 -right-8 opacity-10 pointer-events-none rotate-12">
+                   <DetailedTikiMask variant={7} color="#ef4444" scale={0.3} />
                 </div>
                 
                 <h2 className="tribal-header text-4xl mb-10 flex items-center gap-4 relative z-10">
@@ -737,48 +747,44 @@ export default function App() {
               {/* Floating Dancing Side Masks during fill process */}
               {revealEvents.length > 0 && revealedCount < revealEvents.length && (
                 <>
-                  <div className="fixed left-4 top-1/2 -translate-y-1/2 z-[100] pointer-events-none hidden xl:flex flex-col gap-12">
+                  <div className="fixed left-2 top-1/2 -translate-y-1/2 z-[100] pointer-events-none hidden xl:flex flex-col gap-12 opacity-60">
                      <motion.div
                        animate={{ 
-                         y: [0, -30, 0],
+                         y: [0, -20, 0],
                          rotate: [-5, 5, -5],
-                         scale: [1, 1.1, 1]
                        }}
                        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                      >
-                        <DetailedTikiMask variant={1} color="#f59e0b" scale={1.8} delay={0} />
+                        <DetailedTikiMask variant={1} color="#f59e0b" scale={0.8} delay={0} />
                      </motion.div>
                      <motion.div
                        animate={{ 
-                         y: [0, 30, 0],
+                         y: [0, 20, 0],
                          rotate: [5, -5, 5],
-                         scale: [1, 0.9, 1]
                        }}
                        transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
                      >
-                        <DetailedTikiMask variant={3} color="#ef4444" scale={1.4} delay={0.2} />
+                        <DetailedTikiMask variant={3} color="#ef4444" scale={0.6} delay={0.2} />
                      </motion.div>
                   </div>
-                  <div className="fixed right-4 top-1/2 -translate-y-1/2 z-[100] pointer-events-none hidden xl:flex flex-col gap-12">
+                  <div className="fixed right-2 top-1/2 -translate-y-1/2 z-[100] pointer-events-none hidden xl:flex flex-col gap-12 opacity-60">
                      <motion.div
                        animate={{ 
-                         y: [0, 40, 0],
+                         y: [0, 20, 0],
                          rotate: [10, -10, 10],
-                         scale: [1, 1.05, 1]
                        }}
                        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
                      >
-                        <DetailedTikiMask variant={7} color="#3b82f6" scale={1.8} delay={0.1} />
+                        <DetailedTikiMask variant={7} color="#3b82f6" scale={0.8} delay={0.1} />
                      </motion.div>
                      <motion.div
                        animate={{ 
-                         y: [0, -40, 0],
+                         y: [0, -20, 0],
                          rotate: [-10, 10, -10],
-                         scale: [1, 1.15, 1]
                        }}
                        transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 0.8 }}
                      >
-                        <DetailedTikiMask variant={12} color="#10b981" scale={1.4} delay={0.4} />
+                        <DetailedTikiMask variant={12} color="#10b981" scale={0.6} delay={0.4} />
                      </motion.div>
                   </div>
                 </>
@@ -903,12 +909,12 @@ export default function App() {
                         className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-stone-950/80 backdrop-blur-md"
                       >
                         {/* Celebration Dancing Group */}
-                        <div className="absolute inset-0 flex items-end justify-around pb-20 opacity-40 px-20">
-                          <DetailedTikiMask variant={3} color="#f59e0b" delay={0} scale={1.5} />
-                          <DetailedTikiMask variant={6} color="#ef4444" delay={0.2} scale={1.3} />
-                          <DetailedTikiMask variant={8} color="#3b82f6" delay={0.4} scale={1.6} />
-                          <DetailedTikiMask variant={11} color="#10b981" delay={0.1} scale={1.4} />
-                          <DetailedTikiMask variant={12} color="#8b5cf6" delay={0.3} scale={1.5} />
+                        <div className="absolute inset-0 flex items-end justify-around pb-20 opacity-20 px-20">
+                          <DetailedTikiMask variant={3} color="#f59e0b" delay={0} scale={0.8} />
+                          <DetailedTikiMask variant={6} color="#ef4444" delay={0.2} scale={0.7} />
+                          <DetailedTikiMask variant={8} color="#3b82f6" delay={0.4} scale={0.9} />
+                          <DetailedTikiMask variant={11} color="#10b981" delay={0.1} scale={0.8} />
+                          <DetailedTikiMask variant={12} color="#8b5cf6" delay={0.3} scale={0.7} />
                         </div>
 
                         <motion.div
@@ -1130,9 +1136,9 @@ export default function App() {
                              initial={{ x: -100, opacity: 0 }}
                              animate={{ x: 0, opacity: 1 }}
                              transition={{ delay: 0.6, duration: 1 }}
-                             className="hidden lg:block opacity-40 hover:opacity-100 transition-opacity"
+                             className="hidden lg:block opacity-30 hover:opacity-80 transition-opacity"
                            >
-                              <DetailedTikiMask variant={(tribeIndex * 2) % TIKI_ASSETS.length + 1} color={tribe.color} scale={1.2} />
+                              <DetailedTikiMask variant={(tribeIndex * 2) % TIKI_ASSETS.length + 1} color={tribe.color} scale={0.7} />
                            </motion.div>
 
                            <div className="relative">
@@ -1169,9 +1175,9 @@ export default function App() {
                              initial={{ x: 100, opacity: 0 }}
                              animate={{ x: 0, opacity: 1 }}
                              transition={{ delay: 0.8, duration: 1 }}
-                             className="hidden lg:block opacity-40 hover:opacity-100 transition-opacity"
+                             className="hidden lg:block opacity-30 hover:opacity-80 transition-opacity"
                            >
-                              <DetailedTikiMask variant={(tribeIndex * 2 + 1) % TIKI_ASSETS.length + 1} color={tribe.color} scale={1.2} />
+                              <DetailedTikiMask variant={(tribeIndex * 2 + 1) % TIKI_ASSETS.length + 1} color={tribe.color} scale={0.7} />
                            </motion.div>
                         </motion.div>
                         
@@ -1487,9 +1493,9 @@ export default function App() {
                   </div>
                 </div>
                 {/* Addition: Assets in Tribes Summary header */}
-                <div className="flex gap-8 items-center mr-8 hidden lg:flex">
-                   <DetailedTikiMask variant={9} color="#d3a12a" scale={0.8} />
-                   <DetailedTikiMask variant={10} color="#6a4d94" scale={0.8} />
+                <div className="flex gap-4 items-center mr-8 hidden lg:flex opacity-60">
+                   <DetailedTikiMask variant={9} color="#d3a12a" scale={0.4} />
+                   <DetailedTikiMask variant={10} color="#6a4d94" scale={0.4} />
                 </div>
                 <div className="flex gap-4">
                   <button 
