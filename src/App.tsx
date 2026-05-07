@@ -327,8 +327,6 @@ export default function App() {
   const [vitalsSearch, setVitalsSearch] = useState('');
   const [isPlayMode, setIsPlayMode] = useState(false);
   const [currentPlayIndex, setCurrentPlayIndex] = useState(0);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isFetching, setIsFetching] = useState(false);
 
   const [isMuted, setIsMuted] = useState(false);
 
@@ -341,134 +339,6 @@ export default function App() {
     }
     return () => clearInterval(interval);
   }, [isPlayMode]);
-
-  const loadFromAPI = async () => {
-    setIsFetching(true);
-    try {
-      // We call our backend proxy which handles the fetchData GAS function
-      const response = await fetch(`/api/fetchData?function=fetchData&t=${Date.now()}`);
-      const data = await response.json();
-      
-      if (data && data.error) {
-         console.error("API error details:", data.details);
-         alert(`Island Records Error: ${data.error}\n\n${data.details || ''}`);
-         return;
-      }
-
-      if (Array.isArray(data)) {
-        const usedReps = new Set<string>();
-        const newPlayers: Player[] = data.map((item: any) => {
-          const name = (item.Name || item.name || 'Unknown').trim();
-          let gender: Gender = 'Other';
-          const g = (item.Gender || item.gender || '').trim().toUpperCase();
-          
-          if (g === 'M' || g === 'MALE') gender = 'Male';
-          else if (g === 'F' || g === 'FEMALE' || name.toUpperCase() === 'RIFFY CAMPO') gender = 'Female';
-          
-          const rep = (item.Reputation || item.reputation || '').trim() || getWittyReputation(name, usedReps);
-          usedReps.add(rep);
-
-          return {
-            id: crypto.randomUUID(),
-            name,
-            gender,
-            category: 'Standard',
-            supervisorName: (item.Supervisor || item.supervisor || '').trim(),
-            reputation: rep
-          };
-        });
-
-        setPlayers(newPlayers);
-
-        // Populate tribes based on the "Tribe" field from API
-        // Dynamically add tribes if they don't exist
-        setTribes(prevTribes => {
-          let updatedTribes = [...prevTribes.map(t => ({ ...t, playerIds: [] }))];
-          
-          data.forEach((item: any, idx: number) => {
-            const tribeName = (item.Tribe || item.tribe || '').trim();
-            if (!tribeName) return;
-
-            const player = newPlayers[idx];
-            
-            // Flexible matching for tribe name
-            let tribe = updatedTribes.find(t => 
-              t.name.toLowerCase() === tribeName.toLowerCase() || 
-              t.name.toLowerCase().includes(tribeName.toLowerCase()) ||
-              tribeName.toLowerCase().includes(t.name.toLowerCase())
-            );
-            
-            // If tribe not found, create a new one dynamically
-            if (!tribe) {
-              const newTribe: Tribe = {
-                id: `tribe-dyn-${updatedTribes.length + 1}`,
-                name: tribeName,
-                color: TRIBAL_COLORS[updatedTribes.length % TRIBAL_COLORS.length].value,
-                icon: TIKI_ASSETS[updatedTribes.length % TIKI_ASSETS.length],
-                playerIds: []
-              };
-              updatedTribes.push(newTribe);
-              tribe = newTribe;
-            }
-
-            if (tribe && player) {
-              tribe.playerIds.push(player.id);
-            }
-          });
-          return updatedTribes;
-        });
-      } else {
-        console.warn("API returned non-array data:", data);
-      }
-    } catch (error) {
-      console.error("Error fetching data from API:", error);
-      alert("Failed to reach Island Records. Please check your internet connection.");
-    } finally {
-      setIsFetching(false);
-    }
-  };
-
-  useEffect(() => {
-    loadFromAPI();
-  }, []);
-
-  const saveTribeData = async () => {
-    setIsSaving(true);
-    try {
-      const dataToSave = tribes.flatMap(tribe => 
-        tribe.playerIds.map(pid => {
-          const p = players.find(player => player.id === pid);
-          return {
-            'Tribe': tribe.name,
-            'Name': p?.name || 'Unknown',
-            'Gender': p?.gender || 'Unknown',
-            'Supervisor': p?.supervisorName || 'None',
-            'Reputation': p?.reputation || ''
-          };
-        })
-      );
-
-      const response = await fetch('/api/saveData', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ action: 'saveData', data: dataToSave })
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `Failed to save data. Status: ${response.status}`);
-      }
-
-      alert("Tribe data saved successfully to the Island Records!");
-    } catch (error) {
-      console.error("Error saving tribe data:", error);
-      alert(error instanceof Error ? error.message : "Failed to save tribe data. Check console for details.");
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   const audio = useMemo(() => {
     const a = new Audio('https://assets.mixkit.co/music/preview/mixkit-tribal-ritual-558.mp3');
@@ -1997,14 +1867,6 @@ export default function App() {
                   >
                     <Scroll size={28} />
                   </button>
-                  <button 
-                    onClick={saveTribeData}
-                    disabled={isSaving}
-                    className="px-8 py-4 bg-lagoon text-[#064e3b] font-display text-xl tracking-widest rounded-full shadow-xl hover:bg-ocean-blue transition-all flex items-center gap-3 hover:scale-105 active:scale-95 disabled:opacity-50"
-                  >
-                    {isSaving ? <Loader2 className="animate-spin" size={24} /> : <Download size={24} />} 
-                    {isSaving ? 'SAVING DATA...' : 'SAVE TRIBE DATA'}
-                  </button>
                 </div>
               </div>
 
@@ -2335,13 +2197,7 @@ export default function App() {
                                       <div className="space-y-4 relative z-10 border-b border-stone-800/80 pb-6 flex-grow-0">
                                         <div className="flex flex-col gap-1">
                                           <h4 className="text-4xl font-display text-stone-100 leading-tight group-hover/card:text-torch-orange transition-colors">{p.name}</h4>
-                                          <div className="flex items-center gap-2 text-[10px] text-stone-500 uppercase tracking-widest font-mono">
-                                            <span>{p.gender}</span>
-                                            <span className="text-stone-700">•</span>
-                                            <span className="text-sand/80">Tribe: {tribe.name}</span>
-                                            <span className="text-stone-700">•</span>
-                                            <span>Sup: {p.supervisorName || 'None'}</span>
-                                          </div>
+
                                         </div>
                                         <p className="font-hand text-2xl text-sand leading-relaxed italic animate-in fade-in slide-in-from-left-2 duration-1000 delay-300">
                                           "{stats.description}"
