@@ -74,6 +74,7 @@ interface Player {
   gender: Gender;
   category: Category;
   supervisorName?: string;
+  reputation?: string;
 }
 
 interface Tribe {
@@ -109,6 +110,148 @@ const TIKI_ASSETS = [
 
 const GENDERS: Gender[] = ['Male', 'Female', 'Other'];
 const CATEGORIES: Category[] = ['Standard', 'Supervisor'];
+
+const WITTY_DESCRIPTIONS = [
+  "Can ignite a fire with just a stern look.",
+  "Able to camouflage as a palm tree for up to 4 hours.",
+  "Primary diet consists of coconut water and sheer ambition.",
+  "Has a secret strategic alliance with a local hermit crab.",
+  "Can solve a slide puzzle faster than they can find their keys.",
+  "Speaks fluent Seagull and moderate Crab.",
+  "Survived 3 days on nothing but willpower and one grape.",
+  "Challenged the sun to a staring contest. The sun blinked first.",
+  "Navigates the jungle using only the smell of distant coffee.",
+  "Has 'Hidden Immunity Idol' vibes but it's just a cool rock.",
+  "Legend says they once outrun a falling coconut.",
+  "Can detect a betrayal from three islands away.",
+  "Tactical genius. Specialized in bamboo-based architecture.",
+  "Expert at avoiding eye contact during Tribal Council.",
+  "Actually just here for the free island tan.",
+  "Can weave a waterproof hammock using only sarcasm.",
+  "Possesses the agility of a panther... after coffee.",
+  "Once argued with a parrot and won the debate.",
+  "Can charm a shark into giving up its lunch.",
+  "Once convinced a rainstorm to move to the next island.",
+  "Expert at making fire with two wet noodles and a dream.",
+  "Calculates the trajectory of falling coconuts in their sleep.",
+  "Has a standing appointment with the island's most influential crab.",
+  "Secretly fluent in 'Tropical Bird' and moderate 'Tidal Wave'.",
+  "Holds the record for the longest duration of holding a coconut while balancing on one leg.",
+  "Can identify every type of type of sand by taste alone.",
+  "Once successfully bartered a single sea shell for a four-course dinner.",
+  "Expert at predicting Tribal Council drama based on wind direction.",
+  "Can out-stare a grumpy iguana for 10 minutes straight.",
+  "Has an uncanny ability to find the only spot on the island with zero mosquitoes.",
+  "Knows exactly which palm leaf is the most aerodynamic.",
+  "Can start a campfire by sheer willpower and a really good joke.",
+  "Once out-danced a Sinulog queen during a tropical downpour.",
+  "Possesses a mental map of every hidden immunity idol that hasn't been found yet.",
+  "Can navigate the island using only the positions of sleeping monkeys.",
+  "Legend says their footprint actually makes the sand whiter.",
+  "Able to distinguish 50 different shades of 'Tropical Cyan'.",
+  "Once used a pineapple as a defensive weapon against a very small crab.",
+  "Has the highest recorded 'Tree-to-Ground' descent speed on the island.",
+  "Can braid a sturdy rope out of seaweed and determination.",
+  "Negotiated a trade deal between two rival fruit-bat colonies.",
+  "Spends their free time teaching hermit crabs how to play 4D chess.",
+  "Can predict low tide by the way their thumb twitches.",
+  "Once held their breath so long the ocean thought they were a coral reef.",
+  "Expert at crafting tactical advantages out of driftwood and optimism.",
+  "Has a voice that can soothe a frantic parrot or start a Stampede.",
+  "Can start a fire using only the reflection from a silver lining.",
+  "Legendary navigator who once used a mango as a compass.",
+  "Possesses the unique skill of 'Psychic Sand-Castle Engineering'.",
+  "Can identify 12 types of hibiscus by their scent in a hurricane.",
+  "Spends way too much time theorizing about the hidden society of beach-dwelling spiders.",
+  "Once out-climbed a resident monkey for the last ripe banana.",
+  "Has a secret recipe for 'Island Tea' that the local volcano highly approves of.",
+  "Can weave a full tuxedo out of palm fronds in under 20 minutes.",
+  "Negotiated a peace treaty between a tribe and a very persistent mosquito swarm.",
+  "Known for having the most aerodynamic 'Survivor Buff' in island history.",
+  "Once used a conch shell to broadcast a podcast to the local marine life.",
+  "Expert at turning 'Island Hardships' into 'Strategic Marketing Opportunities'.",
+  "Can summon a school of dolphins using only a rhythmic clapping sequence.",
+  "Possesses an immunity to all forms of island-related fashion disasters.",
+  "Once successfully convinced a cloud to provide shade for exactly 15 minutes.",
+  "Can track a competitor based solely on the scent of their suntan lotion.",
+  "Expert in 'Aggressive Bamboo Whittling' for psychological warfare.",
+  "Can whistle a tune that makes coconuts drop exactly where they want.",
+  "Once traded a cool rock for a 5-star resort-style bamboo hut.",
+  "Has the uncanny ability to always find the 'sweet side' of a wild pineapple.",
+  "Known for being able to meditate while being actively poked by a crab.",
+  "Can predict a blindside by monitoring the heart rate of a nearby seagull.",
+  "Once successfully audited the island's entire sand depository.",
+  "Expert at navigating the social hierarchy of a group of wild boars.",
+  "Can start a fire by rubbing two very enthusiastic sticks together.",
+  "Has a PhD in 'Island Logistics' from the University of Drifting Logs.",
+  "Once out-survived a survival instructor in a 1-on-1 dehydration contest.",
+  "Known for being the only person to keep a secret from the island's gossiping birds.",
+  "Can craft a fully functional surfboard out of an old crate and sheer luck.",
+  "Once interpreted a sunset as a detailed 5-year strategic plan.",
+  "Has an honorary degree in 'Coral Reef Diplomacy'.",
+  "Can identify a traitor by the way they peel a banana.",
+  "Once used a starfish as a stylish (but temporary) broach.",
+  "Expert at finding the most dramatic lighting for their Tribal Council confessionals.",
+  "Can predict the winning tribe based on the flight paths of dragonflies.",
+  "Once survived a week on nothing but 'Island Vibes' and a single lime.",
+  "Has the agility of a panther... specifically one that is very late for a nap.",
+  "Can weave a waterproof hat out of bad luck and palm leaves.",
+  "Once successfully convinced a volcano not to erupt until after the outing.",
+  "Has a collection of 'Lucky Shells' that actually seem to be working.",
+  "Expert at determining the exact age of a coconut by tapping it with a rhythm.",
+  "Can identify a fake immunity idol by licking it (not recommended).",
+  "Once choreographed a dance routine for a confused group of iguanas.",
+  "Has the most meticulously organized shelter in 'Survivor' history.",
+  "Can find the 'North' using only the way moss grows on a discarded flip-flop.",
+  "Once used a signal mirror to accidentally discover a new coordinate system.",
+  "Expert at making island-style cocktails using only naturally occurring ingredients.",
+  "Can hear the sound of a closing alliance from across the lagoon.",
+  "Once successfully negotiated a rent-controlled agreement with a group of tree-shrews.",
+  "Has the most infectious laugh on the island—it's actually a tactical distraction.",
+  "Can craft a pair of sandals out of coconut husks and pure spite.",
+  "Once out-stared a tropical storm until it decided to rain elsewhere.",
+  "Expert at interpreting the subtle social cues of the island's resident turtle.",
+  "Can find a four-leaf clover in a field of poisonous ivy (don't ask how).",
+  "Once used a bamboo pole to 'Vault' over a strategic disagreement.",
+  "Has an internal clock that is accurate to the millisecond of high tide."
+];
+
+const SPECIAL_REPUTATIONS: Record<string, string> = {
+  "Margaux Kylie Cañete": "Former title holder of Miss Carcar 2024. Currently defending her crown against a highly judgmental group of seagulls.",
+  "Margaux Canete": "Former title holder of Miss Carcar 2024. Currently defending her crown against a highly judgmental group of seagulls.",
+  "Marvin Keith Tan": "Richest man in Kinettix. Elon Musk of Cebu. Currently negotiating an acquisition of the Pacific Ocean while optimizing his hydration-to-hustle ratios.",
+  "Ariel Tabacolde": "A person who brushes his teeth 10 times a day. Has the brightest smile in the archipelago and can blind opponents during challenges with a single grin.",
+  "Jennelyn Oporto": "Recently won the title Little Miss Bacayan 2026. Her strategic brilliance is only matched by her ability to negotiate peace between feuding island monkeys.",
+  "WhiteMillen Ponsica": "Can perform accounting using roman numerals in Braille System. Can audit the entire island's coconut inventory while blindfolded and submerged in salt water.",
+  "Jason Mondejar": "Former title holder of Mister Compostela 2024. All the girls from lapu lapu city loves him. Currently considering a move into aquatic fashion design.",
+  "Fionah Sophia Monisit": "Former Sinulog Queen of 2025, she can dance the ghosts away. Her footwork is so fast she can actually walk on coconut milk.",
+  "Michael Amores": "She hates exercise, but does it anyway in her mind. A gold medalist in mental marathons and hypothetical heavy lifting.",
+  "Benny Ong": "Unofficial and hidden member of the P-Pop Girl Group BINI. Often seen practicing choreographies with confused hermit crabs under the moonlight.",
+  "Neil Joshua Paradero": "He loves to perform during christmass parties. Once sang Jingle Bells so passionately that a tropical storm decided to skip the island.",
+  "Mil Matthew Malinao": "Soon to be groom. Already practicing his 'I do' while dodging falling coconuts and sand-fly invasions.",
+  "Riffy Campo": "The most popular governor in Kinettix. Her campaign platform consists entirely of 'More Coconuts for Everyone' and 'Mandatory Island Siestas'.",
+  "Catherine Ballena": "The dancing zumba queen of Kinettix. Can maintain a perfect squat while balance-testing a tribe's strategic alliance.",
+  "Kein Negre": "Can summit mount busay by running backwards with one foot. Currently using this skill to retreat from complex social situations and incoming Tribal Councils.",
+  "Klyde Elydom Etang": "His inspiration is from his multiple children. He has mastered the art of lightning-fast reflexes, primarily from years of catching falling juice boxes and dodging airborne LEGO bricks.",
+  "Carmel Grace Basalo": "Pickleball pro player, part time accountant. Can calculate your taxes while delivering a 60mph serve. If you see her with a paddle and a ledger, run.",
+  "Mary Louise Duaban": "Can perform accounting with her eyes closed and hands tied behind her back. She’s currently auditing the wind to ensure the trade winds are staying within budget.",
+  "Crystel Mae Pontino": "Most successful businesswoman in Kinettix. She can turn a handful of sand into a profitable resort chain before the tide even comes in.",
+  "Cecilio Ramirez": "Successful food entrepreneur. He can whip up a five-course gourmet meal using only a rusty spoon, a coconut, and sheer willpower."
+};
+
+const getWittyReputation = (name: string, excluded: Set<string>): string => {
+  const trimmedName = name.trim();
+  if (SPECIAL_REPUTATIONS[trimmedName]) return SPECIAL_REPUTATIONS[trimmedName];
+  
+  // Find standard ones that aren't used
+  const available = WITTY_DESCRIPTIONS.filter(d => !excluded.has(d));
+  if (available.length > 0) {
+    return available[Math.floor(Math.random() * available.length)];
+  }
+  
+  // Fallback if we run out (unlikely with 100+)
+  return WITTY_DESCRIPTIONS[Math.floor(Math.random() * WITTY_DESCRIPTIONS.length)];
+};
 
 // --- Tiki Mask Wrapper ---
 const DetailedTikiMask = ({ variant = 1, color, delay = 0, scale = 1, assetName: forcedAssetName }: { variant?: number; color: string; delay?: number; scale?: number; assetName?: string }) => {
@@ -184,6 +327,8 @@ export default function App() {
   const [vitalsSearch, setVitalsSearch] = useState('');
   const [isPlayMode, setIsPlayMode] = useState(false);
   const [currentPlayIndex, setCurrentPlayIndex] = useState(0);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
 
   const [isMuted, setIsMuted] = useState(false);
 
@@ -196,6 +341,134 @@ export default function App() {
     }
     return () => clearInterval(interval);
   }, [isPlayMode]);
+
+  const loadFromAPI = async () => {
+    setIsFetching(true);
+    try {
+      // We call our backend proxy which handles the fetchData GAS function
+      const response = await fetch(`/api/fetchData?function=fetchData&t=${Date.now()}`);
+      const data = await response.json();
+      
+      if (data && data.error) {
+         console.error("API error details:", data.details);
+         alert(`Island Records Error: ${data.error}\n\n${data.details || ''}`);
+         return;
+      }
+
+      if (Array.isArray(data)) {
+        const usedReps = new Set<string>();
+        const newPlayers: Player[] = data.map((item: any) => {
+          const name = (item.Name || item.name || 'Unknown').trim();
+          let gender: Gender = 'Other';
+          const g = (item.Gender || item.gender || '').trim().toUpperCase();
+          
+          if (g === 'M' || g === 'MALE') gender = 'Male';
+          else if (g === 'F' || g === 'FEMALE' || name.toUpperCase() === 'RIFFY CAMPO') gender = 'Female';
+          
+          const rep = (item.Reputation || item.reputation || '').trim() || getWittyReputation(name, usedReps);
+          usedReps.add(rep);
+
+          return {
+            id: crypto.randomUUID(),
+            name,
+            gender,
+            category: 'Standard',
+            supervisorName: (item.Supervisor || item.supervisor || '').trim(),
+            reputation: rep
+          };
+        });
+
+        setPlayers(newPlayers);
+
+        // Populate tribes based on the "Tribe" field from API
+        // Dynamically add tribes if they don't exist
+        setTribes(prevTribes => {
+          let updatedTribes = [...prevTribes.map(t => ({ ...t, playerIds: [] }))];
+          
+          data.forEach((item: any, idx: number) => {
+            const tribeName = (item.Tribe || item.tribe || '').trim();
+            if (!tribeName) return;
+
+            const player = newPlayers[idx];
+            
+            // Flexible matching for tribe name
+            let tribe = updatedTribes.find(t => 
+              t.name.toLowerCase() === tribeName.toLowerCase() || 
+              t.name.toLowerCase().includes(tribeName.toLowerCase()) ||
+              tribeName.toLowerCase().includes(t.name.toLowerCase())
+            );
+            
+            // If tribe not found, create a new one dynamically
+            if (!tribe) {
+              const newTribe: Tribe = {
+                id: `tribe-dyn-${updatedTribes.length + 1}`,
+                name: tribeName,
+                color: TRIBAL_COLORS[updatedTribes.length % TRIBAL_COLORS.length].value,
+                icon: TIKI_ASSETS[updatedTribes.length % TIKI_ASSETS.length],
+                playerIds: []
+              };
+              updatedTribes.push(newTribe);
+              tribe = newTribe;
+            }
+
+            if (tribe && player) {
+              tribe.playerIds.push(player.id);
+            }
+          });
+          return updatedTribes;
+        });
+      } else {
+        console.warn("API returned non-array data:", data);
+      }
+    } catch (error) {
+      console.error("Error fetching data from API:", error);
+      alert("Failed to reach Island Records. Please check your internet connection.");
+    } finally {
+      setIsFetching(false);
+    }
+  };
+
+  useEffect(() => {
+    loadFromAPI();
+  }, []);
+
+  const saveTribeData = async () => {
+    setIsSaving(true);
+    try {
+      const dataToSave = tribes.flatMap(tribe => 
+        tribe.playerIds.map(pid => {
+          const p = players.find(player => player.id === pid);
+          return {
+            'Tribe': tribe.name,
+            'Name': p?.name || 'Unknown',
+            'Gender': p?.gender || 'Unknown',
+            'Supervisor': p?.supervisorName || 'None',
+            'Reputation': p?.reputation || ''
+          };
+        })
+      );
+
+      const response = await fetch('/api/saveData', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action: 'saveData', data: dataToSave })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Failed to save data. Status: ${response.status}`);
+      }
+
+      alert("Tribe data saved successfully to the Island Records!");
+    } catch (error) {
+      console.error("Error saving tribe data:", error);
+      alert(error instanceof Error ? error.message : "Failed to save tribe data. Check console for details.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const audio = useMemo(() => {
     const a = new Audio('https://assets.mixkit.co/music/preview/mixkit-tribal-ritual-558.mp3');
@@ -645,6 +918,8 @@ export default function App() {
                         <button 
                           onClick={() => {
                             const lines = rawPlayersInput.split('\n').filter(l => l.trim().includes(','));
+                            const usedReps = new Set(players.map(p => p.reputation).filter(Boolean) as string[]);
+                            
                             const newPlayers = lines.map(line => {
                               const parts = line.split(',').map(p => p.trim());
                               const name = parts[0];
@@ -676,7 +951,17 @@ export default function App() {
                                 finalGender = 'Female';
                               }
                               
-                              return { id: crypto.randomUUID(), name, gender: finalGender, category, supervisorName };
+                              const reputation = getWittyReputation(name, usedReps);
+                              usedReps.add(reputation);
+                              
+                              return { 
+                                id: crypto.randomUUID(), 
+                                name, 
+                                gender: finalGender, 
+                                category, 
+                                supervisorName,
+                                reputation
+                              };
                             });
                             setPlayers([...players, ...newPlayers]);
                             setRawPlayersInput('');
@@ -1713,10 +1998,12 @@ export default function App() {
                     <Scroll size={28} />
                   </button>
                   <button 
-                    onClick={exportToExcel}
-                    className="px-8 py-4 bg-lagoon text-[#064e3b] font-display text-xl tracking-widest rounded-full shadow-xl hover:bg-ocean-blue transition-all flex items-center gap-3 hover:scale-105 active:scale-95"
+                    onClick={saveTribeData}
+                    disabled={isSaving}
+                    className="px-8 py-4 bg-lagoon text-[#064e3b] font-display text-xl tracking-widest rounded-full shadow-xl hover:bg-ocean-blue transition-all flex items-center gap-3 hover:scale-105 active:scale-95 disabled:opacity-50"
                   >
-                    <Download size={24} /> DOWNLOAD SCROLL (EXCEL)
+                    {isSaving ? <Loader2 className="animate-spin" size={24} /> : <Download size={24} />} 
+                    {isSaving ? 'SAVING DATA...' : 'SAVE TRIBE DATA'}
                   </button>
                 </div>
               </div>
@@ -1769,9 +2056,16 @@ export default function App() {
                                     )}
                                   </div>
                                 </div>
-                                <span className="font-display text-xs text-stone-600 uppercase tracking-widest leading-none mt-2 flex items-center gap-1.5">
-                                  <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: tribe.color }} />
-                                  {player?.supervisorName ? `${player.supervisorName}` : player?.category}
+                                <span className="font-display text-xs text-stone-600 uppercase tracking-widest leading-none mt-2 flex flex-col gap-1">
+                                  <div className="flex items-center gap-1.5">
+                                    <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: tribe.color }} />
+                                    {player?.supervisorName ? `${player.supervisorName}` : player?.category}
+                                  </div>
+                                  {player?.reputation && (
+                                    <span className="font-hand text-stone-500 normal-case italic text-sm mt-1">
+                                      "{player.reputation}"
+                                    </span>
+                                  )}
                                 </span>
                               </div>
                             </li>
@@ -1798,79 +2092,16 @@ export default function App() {
               className="space-y-10"
             >
               {(() => {
-                const WITTY_DESCRIPTIONS = [
-                  "Can ignite a fire with just a stern look.",
-                  "Able to camouflage as a palm tree for up to 4 hours.",
-                  "Primary diet consists of coconut water and sheer ambition.",
-                  "Has a secret strategic alliance with a local hermit crab.",
-                  "Can solve a slide puzzle faster than they can find their keys.",
-                  "Speaks fluent Seagull and moderate Crab.",
-                  "Survived 3 days on nothing but willpower and one grape.",
-                  "Challenged the sun to a staring contest. The sun blinked first.",
-                  "Navigates the jungle using only the smell of distant coffee.",
-                  "Has 'Hidden Immunity Idol' vibes but it's just a cool rock.",
-                  "Legend says they once outrun a falling coconut.",
-                  "Can detect a betrayal from three islands away.",
-                  "Tactical genius. Specialized in bamboo-based architecture.",
-                  "Expert at avoiding eye contact during Tribal Council.",
-                  "Actually just here for the free island tan.",
-                  "Can weave a waterproof hammock using only sarcasm.",
-                  "Possesses the agility of a panther... after coffee.",
-                  "Once argued with a parrot and won the debate."
-                ];
-
                 const getPlayerStats = (player: any) => {
                   const seed = player.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
                   const getVal = (offset: number) => 60 + ((seed * offset) % 40);
-                  
-                  // Specific Custom Descriptions
-                  let description = WITTY_DESCRIPTIONS[seed % WITTY_DESCRIPTIONS.length];
-                  if (player.name === "Margaux Kylie Cañete" || player.name === "Margaux Canete") {
-                    description = "Former title holder of Miss Carcar 2024. Currently defending her crown against a highly judgmental group of seagulls.";
-                  } else if (player.name === "Marvin Keith Tan") {
-                    description = "Richest man in Kinettix. Elon Musk of Cebu. Currently negotiating an acquisition of the Pacific Ocean while optimizing his hydration-to-hustle ratios.";
-                  } else if (player.name === "Ariel Tabacolde") {
-                    description = "A person who brushes his teeth 10 times a day. Has the brightest smile in the archipelago and can blind opponents during challenges with a single grin.";
-                  } else if (player.name === "Jennelyn Oporto") {
-                    description = "Recently won the title Little Miss Bacayan 2026. Her strategic brilliance is only matched by her ability to negotiate peace between feuding island monkeys.";
-                  } else if (player.name === "WhiteMillen Ponsica") {
-                    description = "Can perform accounting using roman numerals in Braille System. Can audit the entire island's coconut inventory while blindfolded and submerged in salt water.";
-                  } else if (player.name === "Jason Mondejar") {
-                    description = "Former title holder of Mister Compostela 2024. All the girls from lapu lapu city loves him. Currently considering a move into aquatic fashion design.";
-                  } else if (player.name === "Fionah Sophia Monisit") {
-                    description = "Former Sinulog Queen of 2025, she can dance the ghosts away. Her footwork is so fast she can actually walk on coconut milk.";
-                  } else if (player.name === "Michael Amores") {
-                    description = "She hates exercise, but does it anyway in her mind. A gold medalist in mental marathons and hypothetical heavy lifting.";
-                  } else if (player.name === "Benny Ong") {
-                    description = "Unofficial and hidden member of the P-Pop Girl Group BINI. Often seen practicing choreographies with confused hermit crabs under the moonlight.";
-                  } else if (player.name === "Neil Joshua Paradero") {
-                    description = "He loves to perform during christmass parties. Once sang Jingle Bells so passionately that a tropical storm decided to skip the island.";
-                  } else if (player.name === "Mil Matthew Malinao") {
-                    description = "Soon to be groom. Already practicing his 'I do' while dodging falling coconuts and sand-fly invasions.";
-                  } else if (player.name === "Riffy Campo") {
-                    description = "The most popular governor in Kinettix. Her campaign platform consists entirely of 'More Coconuts for Everyone' and 'Mandatory Island Siestas'.";
-                  } else if (player.name === "Catherine Ballena") {
-                    description = "The dancing zumba queen of Kinettix. Can maintain a perfect squat while balance-testing a tribe's strategic alliance.";
-                  } else if (player.name === "Kein Negre") {
-                    description = "Can summit mount busay by running backwards with one foot. Currently using this skill to retreat from complex social situations and incoming Tribal Councils.";
-                  } else if (player.name === "Klyde Elydom Etang") {
-                    description = "His inspiration is from his multiple children. He has mastered the art of lightning-fast reflexes, primarily from years of catching falling juice boxes and dodging airborne LEGO bricks.";
-                  } else if (player.name === "Carmel Grace Basalo") {
-                    description = "Pickleball pro player, part time accountant. Can calculate your taxes while delivering a 60mph serve. If you see her with a paddle and a ledger, run.";
-                  } else if (player.name === "Mary Louise Duaban") {
-                    description = "Can perform accounting with her eyes closed and hands tied behind her back. She’s currently auditing the wind to ensure the trade winds are staying within budget.";
-                  } else if (player.name === "Crystel Mae Pontino") {
-                    description = "Most successful businesswoman in Kinettix. She can turn a handful of sand into a profitable resort chain before the tide even comes in.";
-                  } else if (player.name === "Cecilio Ramirez") {
-                    description = "Successful food entrepreneur. He can whip up a five-course gourmet meal using only a rusty spoon, a coconut, and sheer willpower.";
-                  }
                   
                   return {
                     strength: getVal(7),
                     agility: getVal(13),
                     intel: getVal(19),
                     spirit: getVal(23),
-                    description
+                    description: player.reputation || "The silent strategist of the island."
                   };
                 };
 
@@ -2101,7 +2332,16 @@ export default function App() {
                                       </div>
 
                                       <div className="space-y-4 relative z-10 border-b border-stone-800/80 pb-6 flex-grow-0">
-                                        <h4 className="text-4xl font-display text-stone-100 leading-tight group-hover/card:text-torch-orange transition-colors">{p.name}</h4>
+                                        <div className="flex flex-col gap-1">
+                                          <h4 className="text-4xl font-display text-stone-100 leading-tight group-hover/card:text-torch-orange transition-colors">{p.name}</h4>
+                                          <div className="flex items-center gap-2 text-[10px] text-stone-500 uppercase tracking-widest font-mono">
+                                            <span>{p.gender}</span>
+                                            <span className="text-stone-700">•</span>
+                                            <span className="text-sand/80">Tribe: {tribe.name}</span>
+                                            <span className="text-stone-700">•</span>
+                                            <span>Sup: {p.supervisorName || 'None'}</span>
+                                          </div>
+                                        </div>
                                         <p className="font-hand text-2xl text-sand leading-relaxed italic animate-in fade-in slide-in-from-left-2 duration-1000 delay-300">
                                           "{stats.description}"
                                         </p>
