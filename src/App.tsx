@@ -129,7 +129,7 @@ const DetailedTikiMask = ({ variant = 1, color, delay = 0, scale = 1, assetName:
       className="relative flex flex-col items-center"
     >
       <img 
-        src={`/assets/${assetName}`} 
+        src={`${import.meta.env.BASE_URL}assets/${assetName}`} 
         className="drop-shadow-2xl"
         style={{ width: 120 * scale, height: 'auto' }}
         alt="Tiki Mask"
@@ -391,7 +391,7 @@ export default function App() {
     if (icon && icon.startsWith('Asset')) {
       return (
         <img 
-          src={`/assets/${icon}`} 
+          src={`${import.meta.env.BASE_URL}assets/${icon}`} 
           style={{ ...style, width: size, height: size, objectFit: 'contain' }} 
           className={cn("drop-shadow-md", className)}
           alt="Tribe Symbol"
