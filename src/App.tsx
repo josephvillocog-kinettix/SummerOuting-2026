@@ -177,6 +177,7 @@ export default function App() {
   const [revealEvents, setRevealEvents] = useState<RevealEvent[]>([]);
   const [revealedCount, setRevealedCount] = useState(0);
   const [inductionOverlayDismissed, setInductionOverlayDismissed] = useState(false);
+  const [selectedTribeId, setSelectedTribeId] = useState<string | null>(null);
 
   const [isMuted, setIsMuted] = useState(false);
 
@@ -254,6 +255,7 @@ export default function App() {
     setInductionOverlayDismissed(false);
     setRevealEvents(events);
     setTribes(newTribes);
+    setSelectedTribeId(null);
     setCurrentView('teams');
   };
 
@@ -464,7 +466,10 @@ export default function App() {
         <NavButton active={currentView === 'roster'} onClick={() => setCurrentView('roster')} icon={<MapIcon size={18} />} label="Roster" />
         <NavButton 
           active={currentView === 'teams'} 
-          onClick={() => setCurrentView('teams')} 
+          onClick={() => {
+            setCurrentView('teams');
+            setSelectedTribeId(null);
+          }} 
           disabled={tribes.length === 0} 
           icon={<Scroll size={18} />} 
           label="Council" 
@@ -811,7 +816,7 @@ export default function App() {
               <div className={cn(
                 "w-full transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] relative z-10",
                 revealedCount >= revealEvents.length 
-                  ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start" 
+                  ? (selectedTribeId ? "flex flex-col items-center" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start") 
                   : "flex items-center justify-center p-4 md:p-12 mb-20"
               )}>
                 {(() => {
@@ -870,7 +875,7 @@ export default function App() {
                              transition={{ duration: 4, repeat: Infinity }}
                              className="mb-8"
                            >
-                             <Skull size={120} className="text-torch-orange mx-auto drop-shadow-[0_0_20px_rgba(249,115,22,0.6)]" />
+                             <Skull size={100} className="text-torch-orange mx-auto drop-shadow-[0_0_20px_rgba(249,115,22,0.6)]" />
                            </motion.div>
                            
                            <h1 className="font-display text-6xl md:text-8xl lg:text-9xl text-stone-100 tracking-[0.4em] uppercase mb-4 drop-shadow-[0_10px_30px_rgba(0,0,0,1)]">
@@ -880,10 +885,37 @@ export default function App() {
                              initial={{ opacity: 0 }}
                              animate={{ opacity: 1 }}
                              transition={{ delay: 1.5, duration: 1 }}
-                             className="font-display text-3xl md:text-4xl text-sand tracking-[0.6em] uppercase opacity-60"
+                             className="font-display text-3xl md:text-4xl text-sand tracking-[0.6em] uppercase opacity-60 mb-12"
                            >
                              BEGINS
                            </motion.p>
+
+                           {/* Row of all 6 Tribes */}
+                           <div className="flex flex-wrap justify-center gap-8 md:gap-12 mt-12 max-w-6xl mx-auto">
+                             {tribes.map((t, idx) => (
+                               <motion.div
+                                 key={t.id}
+                                 initial={{ y: 50, opacity: 0, scale: 0.8 }}
+                                 animate={{ y: 0, opacity: 1, scale: 1 }}
+                                 transition={{ delay: 2 + (idx * 0.2), duration: 0.8 }}
+                                 className="flex flex-col items-center gap-4 group"
+                               >
+                                 <div className="relative p-6 bg-stone-900/60 border-2 border-stone-800 rounded-[2rem] shadow-2xl transition-transform hover:scale-110">
+                                   <div className="absolute inset-0 blur-2xl opacity-10 rounded-full" style={{ backgroundColor: t.color }} />
+                                   <TribeIconComponent icon={t.icon} size={64} style={{ color: t.color }} className="relative z-10" />
+                                   
+                                   {/* Decorative Ring */}
+                                   <div className="absolute -inset-2 border-2 border-stone-800/50 rounded-[2.5rem] pointer-events-none" />
+                                 </div>
+                                 <div className="flex flex-col items-center">
+                                   <span className="font-display text-lg text-stone-100 tracking-widest uppercase" style={{ textShadow: `0 0 10px ${t.color}44` }}>
+                                     {t.name}
+                                   </span>
+                                   <div className="w-12 h-1 mt-2 rounded-full" style={{ backgroundColor: t.color }} />
+                                 </div>
+                               </motion.div>
+                             ))}
+                           </div>
                         </motion.div>
 
                         <motion.div 
@@ -908,13 +940,25 @@ export default function App() {
                         exit={{ opacity: 0 }}
                         className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-stone-950/80 backdrop-blur-md"
                       >
-                        {/* Celebration Dancing Group */}
-                        <div className="absolute inset-0 flex items-end justify-around pb-20 opacity-20 px-20">
-                          <DetailedTikiMask variant={3} color="#f59e0b" delay={0} scale={0.8} />
-                          <DetailedTikiMask variant={6} color="#ef4444" delay={0.2} scale={0.7} />
-                          <DetailedTikiMask variant={8} color="#3b82f6" delay={0.4} scale={0.9} />
-                          <DetailedTikiMask variant={11} color="#10b981" delay={0.1} scale={0.8} />
-                          <DetailedTikiMask variant={12} color="#8b5cf6" delay={0.3} scale={0.7} />
+                        {/* Celebration Dancing Group - All Assigned Tribes */}
+                        <div className="absolute inset-x-0 bottom-0 flex items-end justify-between px-12 md:px-24 pb-12 opacity-30 pointer-events-none">
+                          {tribes.map((t, idx) => (
+                            <motion.div
+                              key={`final-${t.id}`}
+                              animate={{ 
+                                y: [0, -40, 0],
+                                rotate: [-10, 10, -10]
+                              }}
+                              transition={{ 
+                                duration: 3 + Math.random() * 2, 
+                                repeat: Infinity, 
+                                ease: "easeInOut",
+                                delay: idx * 0.3
+                              }}
+                            >
+                              <DetailedTikiMask assetName={t.icon} color={t.color} scale={0.7} />
+                            </motion.div>
+                          ))}
                         </div>
 
                         <motion.div
@@ -1238,6 +1282,145 @@ export default function App() {
                   
                   const tribesToDisplay = isAllRevealed ? tribes : tribes.filter(t => t.id === activeTribeId);
 
+                  if (selectedTribeId && isAllRevealed) {
+                    const selectedTribe = tribes.find(t => t.id === selectedTribeId);
+                    if (!selectedTribe) return null;
+
+                    return (
+                      <motion.div 
+                        key="tribe-detail"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        className="w-full max-w-[95rem] bg-stone-900/40 backdrop-blur-xl rounded-[4rem] border-4 border-stone-800 p-10 md:p-16 relative overflow-hidden shadow-2xl"
+                        style={{ borderColor: selectedTribe.color }}
+                      >
+                         {/* Background Pattern */}
+                         <div className="absolute inset-0 opacity-10 pointer-events-none polynesian-pattern" />
+                         
+                         {/* Header */}
+                         <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-12 relative z-10 border-b border-stone-800 pb-8">
+                            <div className="flex items-center gap-8">
+                               <div className="p-6 bg-stone-950 border-4 border-stone-800 rounded-3xl shadow-xl relative group">
+                                  <TribeIconComponent icon={selectedTribe.icon} size={80} style={{ color: selectedTribe.color }} />
+                                  <div className="absolute inset-0 blur-2xl opacity-20 bg-current rounded-full" style={{ color: selectedTribe.color }} />
+                               </div>
+                               <div className="text-left">
+                                  <h2 className="font-display text-7xl text-stone-100 tracking-widest uppercase mb-2" style={{ textShadow: `0 0 20px ${selectedTribe.color}44` }}>
+                                     {selectedTribe.name}
+                                  </h2>
+                                  <div className="flex items-center gap-4 text-stone-500 font-display tracking-[0.3em] text-sm uppercase">
+                                     <Waves size={16} />
+                                     <span>Established Kinettix Tribe</span>
+                                     <Waves size={16} />
+                                  </div>
+                               </div>
+                            </div>
+                            
+                            <button 
+                              onClick={() => setSelectedTribeId(null)}
+                              className="px-8 py-3 bg-stone-800 hover:bg-stone-700 text-sand font-display tracking-widest uppercase rounded-full transition-all border border-stone-700 hover:border-sand group/back"
+                            >
+                               <ChevronRight className="inline-block mr-2 rotate-180 group-hover/back:-translate-x-1 transition-transform" /> Back to Tribes
+                            </button>
+                         </div>
+
+                         {/* Content Grid */}
+                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 relative z-10">
+                            {/* Table Section */}
+                            <div className="lg:col-span-8">
+                               <div className="overflow-hidden rounded-3xl border-2 border-stone-800 bg-stone-950/60 shadow-2xl">
+                                  <table className="w-full text-left font-display">
+                                     <thead>
+                                        <tr className="bg-stone-900/80 text-stone-500 text-xs tracking-[0.2em] uppercase">
+                                           <th className="px-6 py-4">#</th>
+                                           <th className="px-6 py-4">Castaway</th>
+                                           <th className="px-6 py-4">Gender</th>
+                                           <th className="px-6 py-4">Supervisor</th>
+                                        </tr>
+                                     </thead>
+                                     <tbody className="divide-y divide-stone-800">
+                                        {selectedTribe.playerIds.map((pid, idx) => {
+                                           const player = players.find(p => p.id === pid);
+                                           if (!player) return null;
+                                           return (
+                                              <motion.tr 
+                                                initial={{ opacity: 0, x: -20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                transition={{ delay: idx * 0.05 }}
+                                                key={pid} 
+                                                className="hover:bg-stone-800/30 transition-colors group/row"
+                                              >
+                                                 <td className="px-6 py-5 text-stone-600 font-mono">{(idx + 1).toString().padStart(2, '0')}</td>
+                                                 <td className="px-6 py-5">
+                                                    <div className="flex flex-col">
+                                                       <span className="text-xl text-stone-100 group-hover/row:text-sand transition-colors">{player.name}</span>
+                                                       <span className="text-[10px] text-stone-500 uppercase tracking-widest mt-1">Castaway</span>
+                                                    </div>
+                                                 </td>
+                                                 <td className="px-6 py-5">
+                                                    <div className="flex items-center gap-2">
+                                                       {player.gender === 'Male' ? (
+                                                         <Mars size={18} className="text-sky-400" />
+                                                       ) : player.gender === 'Female' ? (
+                                                         <Venus size={18} className="text-rose-400" />
+                                                       ) : (
+                                                         <MoreHorizontal size={18} className="text-stone-400" />
+                                                       )}
+                                                       <span className="text-xs text-stone-400 uppercase tracking-widest">{player.gender}</span>
+                                                    </div>
+                                                 </td>
+                                                 <td className="px-6 py-5">
+                                                    <div className="flex flex-col">
+                                                       <span className="text-lg text-sand/80 font-medium">{player.supervisorName || '—'}</span>
+                                                       <span className="text-[10px] text-stone-500 uppercase tracking-widest mt-1">Lead Supervisor</span>
+                                                    </div>
+                                                 </td>
+                                              </motion.tr>
+                                           );
+                                        })}
+                                     </tbody>
+                                  </table>
+                               </div>
+                            </div>
+
+                            {/* Dancing Mascot Section */}
+                            <div className="lg:col-span-4 flex flex-col items-center justify-center relative py-12">
+                               <div className="absolute inset-0 bg-gradient-to-t from-stone-950 to-transparent flex items-end justify-center">
+                                  <div className="w-full h-1/2 blur-3xl opacity-20" style={{ backgroundColor: selectedTribe.color }} />
+                                </div>
+                               
+                               <motion.div
+                                 animate={{ 
+                                   y: [0, -30, 0],
+                                   rotate: [-8, 8, -8],
+                                   scale: [1, 1.1, 1]
+                                 }}
+                                 transition={{ 
+                                   duration: 5, 
+                                   repeat: Infinity, 
+                                   ease: "easeInOut" 
+                                 }}
+                                 className="relative z-20"
+                               >
+                                  <div className="absolute -inset-20 blur-[60px] opacity-20 rounded-full" style={{ backgroundColor: selectedTribe.color }} />
+                                  <DetailedTikiMask assetName={selectedTribe.icon} color={selectedTribe.color} scale={1.5} />
+                               </motion.div>
+
+                               <div className="mt-12 text-center relative z-20">
+                                  <p className="font-hand text-3xl text-sand/60 italic">The choice is made.</p>
+                                  <div className="mt-4 flex justify-center gap-6 opacity-30">
+                                     <Flower className="animate-spin-slow text-hibiscus" />
+                                     <Waves className="animate-sway text-ocean-blue" />
+                                     <Flower className="animate-spin-slow text-hibiscus" />
+                                  </div>
+                               </div>
+                            </div>
+                         </div>
+                      </motion.div>
+                    );
+                  }
+
                   return tribesToDisplay.map((tribe) => {
                     // Logic to see who is revealed in this tribe
                     // A player is revealed if their PLAYER_REVEAL event index is <= revealedCount
@@ -1280,9 +1463,12 @@ export default function App() {
                           ease: [0.22, 1, 0.36, 1]
                         }}
                         key={tribe.id} 
+                        onClick={() => {
+                          if (isAllRevealed) setSelectedTribeId(tribe.id);
+                        }}
                         className={cn(
                           "hawaiian-card flex flex-col group border-4 h-full relative overflow-hidden transition-all duration-300",
-                          !isAllRevealed ? "w-full max-w-4xl min-h-[600px]" : "w-full min-h-[280px]",
+                          !isAllRevealed ? "w-full max-w-4xl min-h-[600px]" : "w-full min-h-[280px] cursor-pointer hover:shadow-2xl hover:-translate-y-1 active:scale-95",
                           isActiveTribe ? "shadow-2xl scale-[1.02]" : "shadow-lg opacity-90"
                         )}
                         style={{ 
