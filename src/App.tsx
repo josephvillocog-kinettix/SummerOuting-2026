@@ -351,8 +351,21 @@ export default function App() {
   };
 
   const navToSetup = () => {
+    setIsAuthenticated(false);
+    setLoginStep1('');
+    setLoginStep2('');
+    setLoginError(false);
     setCurrentView('roster');
   };
+
+  useEffect(() => {
+    if (currentView !== 'roster') {
+      setIsAuthenticated(false);
+      setLoginStep1('');
+      setLoginStep2('');
+      setLoginError(false);
+    }
+  }, [currentView]);
   const [revealEvents, setRevealEvents] = useState<RevealEvent[]>([]);
   const [revealedCount, setRevealedCount] = useState(0);
   const [inductionOverlayDismissed, setInductionOverlayDismissed] = useState(false);
@@ -1226,7 +1239,7 @@ export default function App() {
                 <div className="flex items-center gap-4 mb-2">
                    <Flower className="text-hibiscus animate-pulse" size={32} />
                    <h2 className="font-display text-5xl text-stone-100 tracking-[0.2em] drop-shadow-xl">
-                      ALOHA KINETTIX
+                      RISE, TRIBE KINETTIX!
                    </h2>
                    <Flower className="text-hibiscus animate-pulse" size={32} />
                 </div>
@@ -1301,7 +1314,7 @@ export default function App() {
                            </motion.div>
                            
                            <h1 className="font-display text-6xl md:text-8xl lg:text-9xl text-stone-100 tracking-[0.4em] uppercase mb-4 drop-shadow-[0_10px_30px_rgba(0,0,0,1)]">
-                             TRIBAL INDUCTION
+                             THE TRIBAL ASSEMBLY
                            </h1>
                            <motion.p 
                              initial={{ opacity: 0 }}
@@ -1420,7 +1433,7 @@ export default function App() {
                           </motion.div>
 
                           <h2 className="font-display text-4xl md:text-6xl text-sand tracking-[0.3em] mb-4 uppercase drop-shadow-xl">
-                            TRIBE INDUCTION
+                            THE TRIBAL ASSEMBLY
                           </h2>
                           <h1 className="font-display text-7xl md:text-9xl text-amber-500 tracking-[0.1em] uppercase drop-shadow-[0_0_30px_rgba(245,158,11,0.5)]">
                             COMPLETE
