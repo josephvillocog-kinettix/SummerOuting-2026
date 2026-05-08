@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useMemo, useEffect, type ReactNode } from 'react';
+import { useState, useMemo, useEffect, type ReactNode, FormEvent } from 'react';
 import * as XLSX from 'xlsx';
 import { 
   Plus, 
@@ -25,6 +25,8 @@ import {
   Scroll,
   ChevronRight,
   UserCheck,
+  Lock,
+  ShieldCheck,
   Tent,
   Sun,
   Wind,
@@ -85,7 +87,7 @@ interface Tribe {
   icon: string;
 }
 
-type View = 'teams' | 'compose' | 'roster' | 'outplay';
+type View = 'teams' | 'compose' | 'roster' | 'outplay' | 'member-roster';
 
 type RevealEvent = 
   | { type: 'TRIBE_INTRO', tribeId: string }
@@ -253,6 +255,19 @@ const getWittyReputation = (name: string, excluded: Set<string>): string => {
   return WITTY_DESCRIPTIONS[Math.floor(Math.random() * WITTY_DESCRIPTIONS.length)];
 };
 
+const getPlayerStats = (player: Player) => {
+  const seed = player.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const getVal = (offset: number) => 60 + ((seed * offset) % 40);
+  
+  return {
+    strength: getVal(7),
+    agility: getVal(13),
+    intel: getVal(19),
+    spirit: getVal(23),
+    description: player.reputation || "The silent strategist of the island."
+  };
+};
+
 // --- Tiki Mask Wrapper ---
 const DetailedTikiMask = ({ variant = 1, color, delay = 0, scale = 1, assetName: forcedAssetName }: { variant?: number; color: string; delay?: number; scale?: number; assetName?: string }) => {
   const assetIndex = (variant - 1) % TIKI_ASSETS.length;
@@ -318,8 +333,26 @@ export default function App() {
       playerIds: []
     }));
   });
-  const [currentView, setCurrentView] = useState<View>('roster');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentView, setCurrentView] = useState<View>('member-roster');
   const [rawPlayersInput, setRawPlayersInput] = useState('');
+  const [loginStep1, setLoginStep1] = useState('');
+  const [loginStep2, setLoginStep2] = useState('');
+  const [loginError, setLoginError] = useState(false);
+
+  const handleLogin = (e: FormEvent) => {
+    e.preventDefault();
+    if (loginStep1.toLowerCase() === 'one punch man' && loginStep2.toLowerCase() === 'saitama') {
+      setIsAuthenticated(true);
+      setLoginError(false);
+    } else {
+      setLoginError(true);
+    }
+  };
+
+  const navToSetup = () => {
+    setCurrentView('roster');
+  };
   const [revealEvents, setRevealEvents] = useState<RevealEvent[]>([]);
   const [revealedCount, setRevealedCount] = useState(0);
   const [inductionOverlayDismissed, setInductionOverlayDismissed] = useState(false);
@@ -440,22 +473,34 @@ export default function App() {
       }
 
       // Initial pause for Tribal Council initiation
+      if (revealedCount === -1) {
+        return; // Wait for manual start
+      }
+      
+      // Check if current reveal just completed a tribe
+      const currentEvent = revealEvents[revealedCount];
+      let isTribeCompletionPause = false;
+      
+      if (currentEvent?.type === 'PLAYER_REVEAL') {
+        const tribe = tribes.find(t => t.playerIds.includes(currentEvent.playerId));
+        const isLastInTribe = tribe?.playerIds[tribe.playerIds.length - 1] === currentEvent.playerId;
+        if (isLastInTribe) {
+          isTribeCompletionPause = true;
+        }
+      }
+
+      if (isTribeCompletionPause) {
+        return; // Wait for manual proceed
+      }
+      
       let delay = 2000;
       
-      if (revealedCount === -1) {
-        delay = 4500; // Time for "Tribal Council Begins" screen
-      } else {
-        const currentEvent = revealEvents[revealedCount];
-        if (currentEvent?.type === 'TRIBE_INTRO') {
-          delay = 3000; // Pause for tribe intro
-        } else if (currentEvent?.type === 'PLAYER_REVEAL') {
-          const tribe = tribes.find(t => t.playerIds.includes(currentEvent.playerId));
-          const isLastInTribe = tribe?.playerIds[tribe.playerIds.length - 1] === currentEvent.playerId;
-          
-          if (isLastInTribe) {
-            delay = 8000; // Longer pause after tribe is filled
-          }
-        }
+      if (currentEvent?.type === 'TRIBE_INTRO') {
+        delay = 3000; // Pause for tribe intro
+      } else if (currentEvent?.type === 'PLAYER_REVEAL') {
+        // We already checked for isLastInTribe above, which returns, 
+        // so if we are here it's just a normal player reveal
+        delay = 2000;
       }
 
       const timeout = setTimeout(() => {
@@ -622,7 +667,8 @@ export default function App() {
       </div>
       
       <div className="flex items-center gap-2 md:gap-4">
-        <NavButton active={currentView === 'roster'} onClick={() => setCurrentView('roster')} icon={<MapIcon size={18} />} label="Roster" />
+        <NavButton active={currentView === 'member-roster'} onClick={() => setCurrentView('member-roster')} icon={<UserCheck size={18} />} label="Member Roster" />
+        <NavButton active={currentView === 'roster'} onClick={navToSetup} icon={<MapIcon size={18} />} label="Setup" />
         <NavButton 
           active={currentView === 'teams'} 
           onClick={() => {
@@ -645,7 +691,7 @@ export default function App() {
           onClick={() => setCurrentView('outplay')} 
           disabled={tribes.length === 0} 
           icon={<BarChart3 size={18} />} 
-          label="Outplay" 
+          label="Metrics" 
         />
       </div>
     </nav>
@@ -684,19 +730,217 @@ export default function App() {
       
       <main className={cn(
         "mx-auto relative z-10 px-6",
-        currentView === 'teams' ? "max-w-none w-[98%]" : "max-w-7xl"
+        (currentView === 'teams' || currentView === 'member-roster') ? "max-w-none w-[98%]" : "max-w-7xl"
       )}>
         <AnimatePresence mode="wait">
+          {currentView === 'member-roster' && (
+            <motion.div 
+              key="member-roster"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="space-y-10"
+            >
+              <div className="flex flex-col gap-2">
+                <h2 className="font-display text-5xl text-stone-100 tracking-widest">MEMBER ROSTER</h2>
+                <div className="flex items-center gap-3 text-stone-500">
+                  <UserCheck size={20} />
+                  <span className="uppercase tracking-[0.3em] text-xs">Official Tribe Assignment</span>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+                  <div className="relative w-full max-w-md">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-stone-500">
+                      <Search size={18} />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Find your name..."
+                      value={vitalsSearch}
+                      onChange={(e) => setVitalsSearch(e.target.value)}
+                      className="w-full bg-stone-900/40 border-2 border-stone-800 rounded-2xl py-3 pl-12 pr-4 text-stone-100 font-display tracking-widest focus:outline-none focus:border-torch-orange/50 transition-all placeholder:text-stone-600"
+                    />
+                  </div>
+                </div>
+
+                <div className="hawaiian-card overflow-hidden border-stone-800/40 bg-stone-900/20 backdrop-blur-sm">
+                  <div className="overflow-x-auto custom-scrollbar">
+                    <table className="w-full text-left font-display">
+                      <thead>
+                        <tr className="bg-stone-950/60 text-stone-500 text-xs tracking-[0.3em] uppercase">
+                          <th className="px-10 py-6 w-24">#</th>
+                          <th className="px-10 py-6">Castaway</th>
+                          <th className="px-10 py-6">Tribe</th>
+                          <th className="px-10 py-6">Reputation</th>
+                          <th className="px-10 py-6 text-right">Power Vitals</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-stone-800/40">
+                        {players
+                          .filter(p => {
+                            const searchLower = vitalsSearch.toLowerCase();
+                            return p.name.toLowerCase().includes(searchLower) || 
+                                   (p.supervisorName || '').toLowerCase().includes(searchLower);
+                          })
+                          .map((player, pIdx) => {
+                            const tribe = tribes.find(t => t.playerIds.includes(player.id));
+                            if (!tribe) return null;
+                            const stats = getPlayerStats(player);
+                            
+                            return (
+                              <motion.tr 
+                                key={player.id}
+                                initial={{ opacity: 0, x: -10 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                transition={{ delay: pIdx * 0.01 }}
+                                viewport={{ once: true }}
+                                className="hover:bg-stone-800/40 transition-colors group/row"
+                              >
+                                <td className="px-10 py-8">
+                                  <div className="text-stone-500 font-mono text-sm">
+                                    {String(pIdx + 1).padStart(2, '0')}
+                                  </div>
+                                </td>
+                                <td className="px-10 py-8">
+                                  <div className="flex flex-col gap-1">
+                                    <div className="flex items-center gap-3">
+                                      <span className="text-2xl text-stone-100 group-hover/row:text-sand transition-colors font-display tracking-tight">
+                                        {player.name}
+                                      </span>
+                                      <div className="opacity-60 group-hover/row:opacity-100 transition-opacity">
+                                        {player.gender === 'Male' ? <Mars size={18} className="text-sky-400" /> : player.gender === 'Female' ? <Venus size={18} className="text-rose-400" /> : <MoreHorizontal size={18} className="text-stone-500" />}
+                                      </div>
+                                    </div>
+                                    <span className="text-stone-500 text-xs uppercase tracking-widest font-mono">
+                                      Sup: {player.supervisorName || '—'}
+                                    </span>
+                                  </div>
+                                </td>
+                                <td className="px-10 py-8">
+                                  <div className="flex items-center gap-4">
+                                    <div className="w-5 h-5 rounded-full shadow-lg" style={{ backgroundColor: tribe.color }} />
+                                    <span className="text-stone-300 tracking-[0.2em] text-base uppercase font-display">{tribe.name}</span>
+                                  </div>
+                                </td>
+                                <td className="px-10 py-8 max-w-sm">
+                                  <p className="font-hand text-xl text-sand/70 leading-tight italic">"{stats.description}"</p>
+                                </td>
+                                <td className="px-10 py-8 text-right flex justify-end">
+                                  <div className="flex flex-col gap-3 w-64">
+                                    <div className="flex items-center justify-between text-xs uppercase tracking-tighter text-stone-500">
+                                      <span>STR / AGI / INT</span>
+                                      <span>{Math.round((stats.strength + stats.agility + stats.intel) / 3)} MAX</span>
+                                    </div>
+                                    <div className="flex gap-1 h-2 w-full bg-stone-950 rounded-full overflow-hidden">
+                                      <div title={`Strength: ${stats.strength}`} className="h-full bg-torch-red" style={{ width: `${stats.strength/3}%` }} />
+                                      <div title={`Agility: ${stats.agility}`} className="h-full bg-lagoon" style={{ width: `${stats.agility/3}%` }} />
+                                      <div title={`Intelligence: ${stats.intel}`} className="h-full bg-sky-500" style={{ width: `${stats.intel/3}%` }} />
+                                    </div>
+                                    <div className="flex items-center gap-6 mt-1 justify-end">
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-2 h-2 rounded-full bg-torch-red" />
+                                        <span className="text-[10px] text-stone-500">S:{stats.strength}</span>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-2 h-2 rounded-full bg-lagoon" />
+                                        <span className="text-[10px] text-stone-500">A:{stats.agility}</span>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-2 h-2 rounded-full bg-sky-500" />
+                                        <span className="text-[10px] text-stone-500">I:{stats.intel}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </td>
+                              </motion.tr>
+                            );
+                          })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
           {currentView === 'roster' && (
             <motion.div 
               key="roster"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              className="grid grid-cols-1 lg:grid-cols-5 gap-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="space-y-10"
             >
-              {/* Tribe Setup */}
-              <section className="lg:col-span-2 hawaiian-card p-10 group relative border-ocean-blue/20">
+              {!isAuthenticated ? (
+                <div className="flex flex-col items-center justify-center py-20 px-6">
+                  <motion.div 
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="w-full max-w-md bg-stone-900/60 backdrop-blur-2xl border-2 border-stone-800 p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden"
+                  >
+                    <div className="absolute top-0 right-0 p-4 opacity-10">
+                      <Lock size={120} />
+                    </div>
+                    
+                    <div className="relative z-10 text-center mb-8">
+                      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-stone-800 text-torch-orange mb-4 shadow-inner">
+                        <ShieldCheck size={32} />
+                      </div>
+                      <h2 className="font-display text-4xl text-stone-100 tracking-[0.2em] mb-2 uppercase">Command Center</h2>
+                      <p className="text-stone-500 text-sm uppercase tracking-widest font-mono">Restricted Access Territory</p>
+                    </div>
+
+                    <form onSubmit={handleLogin} className="space-y-6 relative z-10">
+                      <div className="space-y-2">
+                        <label className="block text-[10px] text-stone-500 uppercase tracking-[0.3em] ml-4">Primary Clearance</label>
+                        <input
+                          type="password"
+                          value={loginStep1}
+                          onChange={(e) => setLoginStep1(e.target.value)}
+                          className="w-full bg-stone-950/60 border-2 border-stone-800 rounded-2xl py-4 px-6 text-stone-100 focus:outline-none focus:border-torch-orange/50 transition-all text-center tracking-[1em]"
+                          placeholder="••••••••••"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <label className="block text-[10px] text-stone-500 uppercase tracking-[0.3em] ml-4">Secondary Key</label>
+                        <input
+                          type="password"
+                          value={loginStep2}
+                          onChange={(e) => setLoginStep2(e.target.value)}
+                          className="w-full bg-stone-950/60 border-2 border-stone-800 rounded-2xl py-4 px-6 text-stone-100 focus:outline-none focus:border-torch-orange/50 transition-all text-center tracking-[1em]"
+                          placeholder="••••••••••"
+                        />
+                      </div>
+
+                      <AnimatePresence>
+                        {loginError && (
+                          <motion.p 
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="text-torch-red text-center text-xs tracking-widest uppercase font-mono"
+                          >
+                            Incorrect Credentials
+                          </motion.p>
+                        )}
+                      </AnimatePresence>
+
+                      <button 
+                        type="submit"
+                        className="w-full py-5 bg-gradient-to-r from-torch-orange to-stone-900 rounded-2xl font-display text-stone-100 tracking-[0.4em] uppercase hover:scale-[1.02] active:scale-95 transition-all shadow-lg hover:shadow-torch-orange/20"
+                      >
+                        Enter Terminal
+                      </button>
+                    </form>
+                  </motion.div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                  {/* Tribe Setup */}
+                  <section className="lg:col-span-2 hawaiian-card p-10 group relative border-ocean-blue/20">
                 <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none">
                   <div className="polynesian-pattern w-full h-full" />
                 </div>
@@ -915,6 +1159,8 @@ export default function App() {
                   </button>
                 </div>
               </section>
+                </div>
+              )}
             </motion.div>
           )}
 
@@ -1073,7 +1319,7 @@ export default function App() {
                                  key={t.id}
                                  initial={{ y: 50, opacity: 0, scale: 0.8 }}
                                  animate={{ y: 0, opacity: 1, scale: 1 }}
-                                 transition={{ delay: 2 + (idx * 0.2), duration: 0.8 }}
+                                 transition={{ delay: 1 + (idx * 0.1), duration: 0.8 }}
                                  className="flex flex-col items-center gap-4 group"
                                >
                                  <div className="relative p-6 bg-stone-900/60 border-2 border-stone-800 rounded-[2rem] shadow-2xl transition-transform hover:scale-110">
@@ -1092,6 +1338,24 @@ export default function App() {
                                </motion.div>
                              ))}
                            </div>
+
+                           <motion.div
+                             initial={{ opacity: 0, scale: 0.8 }}
+                             animate={{ opacity: 1, scale: 1 }}
+                             transition={{ delay: 2.5, duration: 0.8 }}
+                             className="mt-16 relative z-30"
+                           >
+                             <button 
+                               onClick={() => setRevealedCount(0)}
+                               className="group relative px-20 py-8 overflow-hidden rounded-full transition-all hover:scale-110 active:scale-95 shadow-[0_0_50px_rgba(249,115,22,0.4)] active:shadow-inner"
+                             >
+                                <div className="absolute inset-0 bg-stone-900/40 backdrop-blur-xl border-4 border-torch-orange/50 rounded-full group-hover:border-torch-orange transition-colors" />
+                                <div className="absolute inset-x-0 bottom-0 h-1 bg-torch-orange/20 animate-shimmer" />
+                                <span className="relative z-10 flex items-center gap-6 font-display text-4xl text-stone-100 tracking-[0.5em] uppercase">
+                                  PROCEED <ChevronRight size={40} className="text-torch-orange group-hover:translate-x-3 transition-transform" />
+                                </span>
+                             </button>
+                           </motion.div>
                         </motion.div>
 
                         <motion.div 
@@ -1830,6 +2094,27 @@ export default function App() {
                               })}
                             </AnimatePresence>
                          </div>
+
+                         {tribeIsFilled && !isAllRevealed && (
+                           <motion.div 
+                             initial={{ opacity: 0, y: 20 }}
+                             animate={{ opacity: 1, y: 0 }}
+                             className="mt-8 flex justify-center"
+                           >
+                             <button 
+                               onClick={(e) => {
+                                 e.stopPropagation();
+                                 setRevealedCount(prev => prev + 1);
+                               }}
+                               className="group relative px-12 py-5 overflow-hidden rounded-full transition-all hover:scale-110 active:scale-95 shadow-[0_0_30px_rgba(249,115,22,0.3)]"
+                             >
+                               <div className="absolute inset-0 bg-stone-900/60 backdrop-blur-xl border-2 border-torch-orange/50 rounded-full group-hover:border-torch-orange transition-colors" />
+                               <span className="relative z-10 flex items-center gap-3 font-display text-xl text-stone-100 tracking-widest uppercase">
+                                 PROCEED <ChevronRight size={24} className="text-torch-orange group-hover:translate-x-2 transition-transform" />
+                               </span>
+                             </button>
+                           </motion.div>
+                         )}
                       </div>
                       </motion.div>
                     );
@@ -1955,19 +2240,6 @@ export default function App() {
               className="space-y-10"
             >
               {(() => {
-                const getPlayerStats = (player: any) => {
-                  const seed = player.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-                  const getVal = (offset: number) => 60 + ((seed * offset) % 40);
-                  
-                  return {
-                    strength: getVal(7),
-                    agility: getVal(13),
-                    intel: getVal(19),
-                    spirit: getVal(23),
-                    description: player.reputation || "The silent strategist of the island."
-                  };
-                };
-
                 const filteredPlayers = players.filter(p => {
                   const searchLower = vitalsSearch.toLowerCase();
                   return p.name.toLowerCase().includes(searchLower) || 
