@@ -362,14 +362,6 @@ export default function App() {
   };
 
   useEffect(() => {
-    if (currentView !== 'roster') {
-      setIsAuthenticated(false);
-      setLoginStep1('');
-      setLoginStep2('');
-      setLoginError(false);
-    }
-  }, [currentView]);
-  useEffect(() => {
     if (currentView === 'member-roster' && players.length === 0) {
       loadFromGoogleSheets();
     }
@@ -788,31 +780,53 @@ export default function App() {
       
       <div className="flex items-center gap-2 md:gap-4">
         <NavButton active={currentView === 'member-roster'} onClick={() => setCurrentView('member-roster')} icon={<UserCheck size={18} />} label="Member Roster" />
-        <NavButton active={currentView === 'roster'} onClick={navToSetup} icon={<MapIcon size={18} />} label="Setup" />
-        <NavButton 
-          active={currentView === 'teams'} 
-          onClick={() => {
-            setCurrentView('teams');
-            setSelectedTribeId(null);
-          }} 
-          disabled={tribes.length === 0} 
-          icon={<Scroll size={18} />} 
-          label="Council" 
-        />
-        <NavButton 
-          active={currentView === 'compose'} 
-          onClick={() => setCurrentView('compose')} 
-          disabled={tribes.length === 0} 
-          icon={<Users size={18} />} 
-          label="Tribes" 
-        />
-        <NavButton 
-          active={currentView === 'outplay'} 
-          onClick={() => setCurrentView('outplay')} 
-          disabled={tribes.length === 0} 
-          icon={<BarChart3 size={18} />} 
-          label="Metrics" 
-        />
+        
+        {!isAuthenticated && (
+          <NavButton 
+            active={currentView === 'roster'} 
+            onClick={() => setCurrentView('roster')} 
+            icon={<Lock size={18} />} 
+            label="Admin Login" 
+          />
+        )}
+
+        {isAuthenticated && (
+          <>
+            <NavButton active={currentView === 'roster'} onClick={() => setCurrentView('roster')} icon={<MapIcon size={18} />} label="Setup" />
+            <NavButton 
+              active={currentView === 'teams'} 
+              onClick={() => {
+                setCurrentView('teams');
+                setSelectedTribeId(null);
+              }} 
+              disabled={tribes.length === 0} 
+              icon={<Scroll size={18} />} 
+              label="Council" 
+            />
+            <NavButton 
+              active={currentView === 'compose'} 
+              onClick={() => setCurrentView('compose')} 
+              disabled={tribes.length === 0} 
+              icon={<Users size={18} />} 
+              label="Tribes" 
+            />
+            <NavButton 
+              active={currentView === 'outplay'} 
+              onClick={() => setCurrentView('outplay')} 
+              disabled={tribes.length === 0} 
+              icon={<BarChart3 size={18} />} 
+              label="Metrics" 
+            />
+            <button
+              onClick={() => setIsAuthenticated(false)}
+              className="ml-2 flex items-center gap-2 px-3 py-2 rounded-md text-stone-500 hover:text-torch-red transition-all"
+              title="Logout Admin"
+            >
+              <Trash2 size={16} />
+              <span className="hidden lg:inline uppercase text-[10px] tracking-widest">Logout</span>
+            </button>
+          </>
+        )}
       </div>
     </nav>
   );
@@ -1295,7 +1309,7 @@ export default function App() {
             </motion.div>
           )}
 
-          {currentView === 'teams' && (
+          {isAuthenticated && currentView === 'teams' && (
             <motion.div 
               key="teams"
               initial={{ opacity: 0 }}
@@ -2278,7 +2292,7 @@ export default function App() {
             </motion.div>
           )}
 
-          {currentView === 'compose' && (
+          {isAuthenticated && currentView === 'compose' && (
             <motion.div 
               key="compose"
               initial={{ opacity: 0, scale: 0.95 }}
@@ -2386,7 +2400,7 @@ export default function App() {
             </motion.div>
           )}
 
-          {currentView === 'outplay' && (
+          {isAuthenticated && currentView === 'outplay' && (
             <motion.div 
               key="outplay"
               initial={{ opacity: 0, y: 20 }}
