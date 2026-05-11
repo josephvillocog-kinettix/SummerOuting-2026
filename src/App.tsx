@@ -470,6 +470,7 @@ export default function App() {
   };
   const [selectedTribeId, setSelectedTribeId] = useState<string | null>(null);
   const [vitalsSearch, setVitalsSearch] = useState('');
+  const [selectedRosterTribeId, setSelectedRosterTribeId] = useState<string | null>(null);
   const [isPlayMode, setIsPlayMode] = useState(false);
   const [currentPlayIndex, setCurrentPlayIndex] = useState(0);
 
@@ -908,6 +909,39 @@ export default function App() {
                       className="w-full bg-stone-900/40 border-2 border-stone-800 rounded-2xl py-3 pl-12 pr-4 text-stone-100 font-display tracking-widest focus:outline-none focus:border-torch-orange/50 transition-all placeholder:text-stone-600"
                     />
                   </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => setSelectedRosterTribeId(null)}
+                      className={cn(
+                        "px-4 py-2 rounded-full border text-[10px] md:text-xs tracking-widest uppercase transition-all font-display",
+                        selectedRosterTribeId === null 
+                          ? "bg-stone-100 text-stone-900 border-stone-100" 
+                          : "bg-transparent text-stone-500 border-stone-800 hover:border-stone-700"
+                      )}
+                    >
+                      All Tribes
+                    </button>
+                    {tribes.map(tribe => (
+                      <button
+                        key={tribe.id}
+                        onClick={() => setSelectedRosterTribeId(tribe.id)}
+                        className={cn(
+                          "px-4 py-2 rounded-full border text-[10px] md:text-xs tracking-widest uppercase transition-all font-display bg-opacity-10",
+                          selectedRosterTribeId === tribe.id 
+                            ? "text-stone-900" 
+                            : "text-stone-400 border-stone-800 hover:border-stone-700"
+                        )}
+                        style={{ 
+                          backgroundColor: selectedRosterTribeId === tribe.id ? tribe.color : undefined,
+                          borderColor: selectedRosterTribeId === tribe.id ? tribe.color : undefined,
+                          color: selectedRosterTribeId === tribe.id ? (tribe.color === '#fbbf24' ? '#000' : '#fff') : undefined
+                        }}
+                      >
+                        {tribe.name}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="hawaiian-card overflow-hidden border-stone-800/40 bg-stone-900/20 backdrop-blur-sm">
@@ -926,8 +960,15 @@ export default function App() {
                         {players
                           .filter(p => {
                             const searchLower = vitalsSearch.toLowerCase();
-                            return p.name.toLowerCase().includes(searchLower) || 
+                            const matchesSearch = p.name.toLowerCase().includes(searchLower) || 
                                    (p.supervisorName || '').toLowerCase().includes(searchLower);
+                            
+                            if (selectedRosterTribeId) {
+                              const tribe = tribes.find(t => t.id === selectedRosterTribeId);
+                              return matchesSearch && tribe?.playerIds.includes(p.id);
+                            }
+                            
+                            return matchesSearch;
                           })
                           .map((player, pIdx) => {
                             const tribe = tribes.find(t => t.playerIds.includes(player.id));
