@@ -374,6 +374,7 @@ const DancingTribeGroup = ({ color, side }: { color: string; side: 'left' | 'rig
 
 export default function App() {
   const [players, setPlayers] = useState<Player[]>([]);
+  const [rosterPlayers, setRosterPlayers] = useState<Player[]>([]);
   const [tribes, setTribes] = useState<Tribe[]>(() => {
     return TRIBAL_COLORS.map((tc, i) => ({
       id: `tribe-${i + 1}`,
@@ -409,8 +410,8 @@ export default function App() {
   };
 
   useEffect(() => {
-    if (currentView === 'member-roster' && players.length === 0) {
-      loadFromGoogleSheets();
+    if (currentView === 'member-roster' && rosterPlayers.length === 0) {
+      loadFromGoogleSheets(true);
     }
   }, [currentView]);
   const [revealEvents, setRevealEvents] = useState<RevealEvent[]>([]);
@@ -420,7 +421,7 @@ export default function App() {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isLoadingRegistry, setIsLoadingRegistry] = useState(false);
 
-  const loadFromGoogleSheets = async () => {
+  const loadFromGoogleSheets = async (isForRoster: boolean = true) => {
     setIsLoadingRegistry(true);
     try {
       const response = await fetch("https://script.google.com/macros/s/AKfycbyaLTqpOOj2bNO0coHaLjpHdOdtC6vu1JmSH-Bujiuc3dzdPEJN1k50zoQlaTtqAij5/exec");
@@ -441,13 +442,13 @@ export default function App() {
         data.forEach(item => {
           const id = crypto.randomUUID();
           // Derive some stats/info if possible, otherwise default
-          const reputation = getWittyReputation(item.name || item.name, usedReps);
+          const reputation = getWittyReputation(item.name || 'Unknown', usedReps);
           usedReps.add(reputation);
 
           const player: Player = {
             id,
             name: item.name || 'Unknown',
-            gender: 'Other', // We don't have gender in the sheet specifically requested but derived from name if known
+            gender: 'Other', 
             category: 'Standard',
             supervisorName: item.supervisor || 'N/A',
             reputation
@@ -464,13 +465,17 @@ export default function App() {
           }
         });
         
-        setPlayers(newPlayers);
-        setTribes(updatedTribes);
-        console.log('Successfully loaded registry from Google Sheets');
+        if (isForRoster) {
+          setRosterPlayers(newPlayers);
+          setTribes(updatedTribes);
+        } else {
+          setPlayers(newPlayers);
+          setTribes(updatedTribes);
+        }
+        console.log(`Successfully loaded registry into ${isForRoster ? 'roster' : 'setup'}`);
       }
     } catch (error) {
       console.error('Error loading from Google Sheets:', error);
-      // alert('Failed to sync from registry. Make sure the web app is published and accessible.');
     } finally {
       setIsLoadingRegistry(false);
     }
@@ -1007,7 +1012,7 @@ export default function App() {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-stone-800/40">
-                          {players
+                          {rosterPlayers
                             .filter(p => {
                               const searchLower = vitalsSearch.toLowerCase();
                               const matchesSearch = p.name.toLowerCase().includes(searchLower) || 
