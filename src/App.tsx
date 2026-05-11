@@ -379,7 +379,7 @@ export default function App() {
     setSaveSuccess(false);
     
     try {
-      // Prepare data for Google Sheets: name, tribe, supervisor in that order
+      // Prepare data for Google Sheets: JSON list containing objects with name, tribe, supervisor
       const dataToSave = players
         .filter(p => tribes.some(t => t.playerIds.includes(p.id)))
         .map(p => ({
@@ -390,26 +390,20 @@ export default function App() {
 
       console.log('Syncing data to Google Sheets:', dataToSave);
 
-      // Using an object envelope to ensure the script has context
-      const payload = {
-        action: 'saveTribes',
-        timestamp: new Date().toISOString(),
-        rows: dataToSave
-      };
-
-      // Sending via text/plain with no-cors to handle GAS redirection and CORS restrictions
+      // Sending via text/plain with no-cors is the most reliable way to POST to Google Apps Script 
+      // It handles the 302 redirection and avoids CORS preflight blocks.
       await fetch("https://script.google.com/macros/s/AKfycbyaLTqpOOj2bNO0coHaLjpHdOdtC6vu1JmSH-Bujiuc3dzdPEJN1k50zoQlaTtqAij5/exec", {
         method: 'POST',
         mode: 'no-cors',
+        cache: 'no-cache',
         headers: {
-          'Content-Type': 'text/plain',
+          'Content-Type': 'text/plain;charset=utf-8',
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(dataToSave),
       });
 
-      // Verification: Since we use no-cors, we can't read the response.
-      // We assume success if the fetch promise resolves without timing out or erroring.
-      console.log('Sync request successfully dispatched to Google Apps Script.');
+      // Verification: With no-cors, we assume success if the fetch resolves without throwing.
+      console.log('Sync request successfully dispatched to registry.');
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (error) {
