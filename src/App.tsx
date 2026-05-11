@@ -39,6 +39,8 @@ import {
   MoreHorizontal,
   Download,
   Cloud,
+  CloudUpload,
+  Save,
   Loader2,
   Check,
   Play,
@@ -226,7 +228,7 @@ const SPECIAL_REPUTATIONS: Record<string, string> = {
   "Jennelyn Oporto": "Recently won the title Little Miss Bacayan 2026. Her strategic brilliance is only matched by her ability to negotiate peace between feuding island monkeys.",
   "WhiteMillen Ponsica": "Can perform accounting using roman numerals in Braille System. Can audit the entire island's coconut inventory while blindfolded and submerged in salt water.",
   "Jason Mondejar": "Former title holder of Mister Compostela 2024. All the girls from lapu lapu city loves him. Currently considering a move into aquatic fashion design.",
-  "Fionah Sophia Monisit": "Former Sinulog Queen of 2025, she can dance the ghosts away. Her footwork is so fast she can actually walk on coconut milk.",
+  "Fionah Sophia Monisit": "Former Sarok Festival Queen of 2025, she can dance the ghosts away. Her footwork is so fast she can actually walk on coconut milk.",
   "Michael Amores": "She hates exercise, but does it anyway in her mind. A gold medalist in mental marathons and hypothetical heavy lifting.",
   "Benny Ong": "Unofficial and hidden member of the P-Pop Girl Group BINI. Often seen practicing choreographies with confused hermit crabs under the moonlight.",
   "Neil Joshua Paradero": "He loves to perform during christmass parties. Once sang Jingle Bells so passionately that a tropical storm decided to skip the island.",
@@ -369,6 +371,48 @@ export default function App() {
   const [revealEvents, setRevealEvents] = useState<RevealEvent[]>([]);
   const [revealedCount, setRevealedCount] = useState(0);
   const [inductionOverlayDismissed, setInductionOverlayDismissed] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  const saveToGoogleSheets = async () => {
+    setIsSaving(true);
+    setSaveSuccess(false);
+    
+    try {
+      // Prepare data for Google Sheets: only name, tribe, and supervisor
+      const dataToSave = players
+        .filter(p => tribes.some(t => t.playerIds.includes(p.id)))
+        .map(p => ({
+          name: p.name,
+          tribe: tribes.find(t => t.playerIds.includes(p.id))?.name || 'N/A',
+          supervisor: p.supervisorName || 'N/A'
+        }));
+
+      const response = await fetch("https://script.google.com/macros/s/AKfycbyaLTqpOOj2bNO0coHaLjpHdOdtC6vu1JmSH-Bujiuc3dzdPEJN1k50zoQlaTtqAij5/exec", {
+        method: 'POST',
+        mode: 'no-cors', // Important for Google Apps Script web apps if you don't handle CORS explicitly
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'saveTribes',
+          timestamp: new Date().toISOString(),
+          data: dataToSave
+        }),
+      });
+
+      // Since we're using no-cors, we won't get a standard response body, 
+      // but if it didn't throw, we assume success for this demo/prototype
+      console.log('Save request sent');
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (error) {
+      console.error('Error saving to Google Sheets:', error);
+      alert('Failed to save data. Please check your connection.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
   const [selectedTribeId, setSelectedTribeId] = useState<string | null>(null);
   const [vitalsSearch, setVitalsSearch] = useState('');
   const [isPlayMode, setIsPlayMode] = useState(false);
@@ -1447,6 +1491,29 @@ export default function App() {
                           />
                           
                           <div className="flex flex-col md:flex-row items-center justify-center gap-4 mt-12">
+                            <motion.button
+                              initial={{ opacity: 0, scale: 0.9 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ delay: 1.4 }}
+                              disabled={isSaving || saveSuccess}
+                              onClick={saveToGoogleSheets}
+                              className={cn(
+                                "flex items-center gap-3 px-10 py-4 font-display tracking-widest uppercase rounded-full transition-all shadow-lg pointer-events-auto",
+                                saveSuccess 
+                                  ? "bg-green-600 text-white" 
+                                  : "bg-lagoon hover:bg-ocean-blue text-white hover:shadow-lagoon/20"
+                              )}
+                            >
+                              {isSaving ? (
+                                <Loader2 size={20} className="animate-spin" />
+                              ) : saveSuccess ? (
+                                <Check size={20} />
+                              ) : (
+                                <CloudUpload size={20} />
+                              )}
+                              <span>{isSaving ? 'Syncing...' : saveSuccess ? 'Saved to Sheet' : 'Save to Registry'}</span>
+                            </motion.button>
+
                             <motion.button
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
