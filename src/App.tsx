@@ -241,7 +241,8 @@ const SPECIAL_REPUTATIONS: Record<string, string> = {
   "Carmel Grace Basalo": "Pickleball pro player, part time accountant. Can calculate your taxes while delivering a 60mph serve. If you see her with a paddle and a ledger, run.",
   "Mary Louise Duaban": "Can perform accounting with her eyes closed and hands tied behind her back. She’s currently auditing the wind to ensure the trade winds are staying within budget.",
   "Crystel Mae Pontino": "Most successful businesswoman in Kinettix. She can turn a handful of sand into a profitable resort chain before the tide even comes in.",
-  "Cecilio Ramirez": "Successful food entrepreneur. He can whip up a five-course gourmet meal using only a rusty spoon, a coconut, and sheer willpower."
+  "Cecilio Ramirez": "Successful food entrepreneur. He can whip up a five-course gourmet meal using only a rusty spoon, a coconut, and sheer willpower.",
+  "Clarisse Sabdao": "Small but terrible. Don't let her size fool you—she once intimidated a shark just by making eye contact and owns more strategic brilliance than the rest of the island combined."
 };
 
 const getWittyReputation = (name: string, excluded: Set<string>): string => {
