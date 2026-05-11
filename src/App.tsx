@@ -307,6 +307,53 @@ const DetailedTikiMask = ({ variant = 1, color, delay = 0, scale = 1, assetName:
   );
 };
 
+const DancingTikiLoading = () => {
+  return (
+    <div className="flex flex-col items-center justify-center py-32 gap-12">
+      <div className="flex items-center gap-4 md:gap-10">
+        {TRIBAL_COLORS.map((tc, idx) => (
+          <motion.div
+            key={tc.name}
+            animate={{
+              y: [0, -30, 0],
+              rotate: [-15, 15, -15],
+              scale: [1, 1.2, 1],
+              opacity: [0.7, 1, 0.7]
+            }}
+            transition={{
+              duration: 2.5,
+              repeat: Infinity,
+              delay: idx * 0.15,
+              ease: "easeInOut"
+            }}
+            className="flex flex-col items-center"
+          >
+            <img 
+              src={`${import.meta.env.BASE_URL}assets/${tc.icon}`} 
+              className="w-16 h-16 md:w-24 md:h-24 object-contain drop-shadow-[0_0_20px_rgba(255,255,255,0.3)]"
+              alt={tc.name}
+            />
+            <div 
+              className="w-8 h-1 bg-stone-900 rounded-full blur-md mt-4 opacity-40 translate-y-4"
+              style={{ width: '60%' }}
+            />
+          </motion.div>
+        ))}
+      </div>
+      <div className="flex flex-col items-center gap-3 text-center">
+        <motion.h3 
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="font-display text-3xl text-stone-100 tracking-[0.5em] uppercase"
+        >
+          Syncing Tribe Registry
+        </motion.h3>
+        <p className="text-stone-500 text-xs tracking-[0.3em] uppercase font-mono">Consulting the Ancient Palm Leaves...</p>
+      </div>
+    </div>
+  );
+};
+
 
 // --- Silhouettes for Background ---
 const RealisticTikiMask = ({ color, delay = 0, scale = 1 }: { color: string; delay?: number; scale?: number }) => (
@@ -945,107 +992,111 @@ export default function App() {
                 </div>
 
                 <div className="hawaiian-card overflow-hidden border-stone-800/40 bg-stone-900/20 backdrop-blur-sm">
-                  <div className="overflow-x-auto custom-scrollbar">
-                    <table className="w-full text-left font-display">
-                      <thead>
-                        <tr className="bg-stone-950/60 text-stone-500 text-xs tracking-[0.3em] uppercase">
-                          <th className="px-10 py-6 w-24">#</th>
-                          <th className="px-10 py-6">Castaway</th>
-                          <th className="px-10 py-6">Tribe</th>
-                          <th className="px-10 py-6">Reputation</th>
-                          <th className="px-10 py-6 text-right">Power Vitals</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-stone-800/40">
-                        {players
-                          .filter(p => {
-                            const searchLower = vitalsSearch.toLowerCase();
-                            const matchesSearch = p.name.toLowerCase().includes(searchLower) || 
-                                   (p.supervisorName || '').toLowerCase().includes(searchLower);
-                            
-                            if (selectedRosterTribeId) {
-                              const tribe = tribes.find(t => t.id === selectedRosterTribeId);
-                              return matchesSearch && tribe?.playerIds.includes(p.id);
-                            }
-                            
-                            return matchesSearch;
-                          })
-                          .map((player, pIdx) => {
-                            const tribe = tribes.find(t => t.playerIds.includes(player.id));
-                            if (!tribe) return null;
-                            const stats = getPlayerStats(player);
-                            
-                            return (
-                              <motion.tr 
-                                key={player.id}
-                                initial={{ opacity: 0, x: -10 }}
-                                whileInView={{ opacity: 1, x: 0 }}
-                                transition={{ delay: pIdx * 0.01 }}
-                                viewport={{ once: true }}
-                                className="hover:bg-stone-800/40 transition-colors group/row"
-                              >
-                                <td className="px-10 py-8">
-                                  <div className="text-stone-500 font-mono text-sm">
-                                    {String(pIdx + 1).padStart(2, '0')}
-                                  </div>
-                                </td>
-                                <td className="px-10 py-8">
-                                  <div className="flex flex-col gap-1">
-                                    <div className="flex items-center gap-3">
-                                      <span className="text-2xl text-stone-100 group-hover/row:text-sand transition-colors font-display tracking-tight">
-                                        {player.name}
+                  {isLoadingRegistry ? (
+                    <DancingTikiLoading />
+                  ) : (
+                    <div className="overflow-x-auto custom-scrollbar">
+                      <table className="w-full text-left font-display">
+                        <thead>
+                          <tr className="bg-stone-950/60 text-stone-500 text-xs tracking-[0.3em] uppercase">
+                            <th className="px-10 py-6 w-24">#</th>
+                            <th className="px-10 py-6">Castaway</th>
+                            <th className="px-10 py-6">Tribe</th>
+                            <th className="px-10 py-6">Reputation</th>
+                            <th className="px-10 py-6 text-right">Power Vitals</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-stone-800/40">
+                          {players
+                            .filter(p => {
+                              const searchLower = vitalsSearch.toLowerCase();
+                              const matchesSearch = p.name.toLowerCase().includes(searchLower) || 
+                                     (p.supervisorName || '').toLowerCase().includes(searchLower);
+                              
+                              if (selectedRosterTribeId) {
+                                const tribe = tribes.find(t => t.id === selectedRosterTribeId);
+                                return matchesSearch && tribe?.playerIds.includes(p.id);
+                              }
+                              
+                              return matchesSearch;
+                            })
+                            .map((player, pIdx) => {
+                              const tribe = tribes.find(t => t.playerIds.includes(player.id));
+                              if (!tribe) return null;
+                              const stats = getPlayerStats(player);
+                              
+                              return (
+                                <motion.tr 
+                                  key={player.id}
+                                  initial={{ opacity: 0, x: -10 }}
+                                  whileInView={{ opacity: 1, x: 0 }}
+                                  transition={{ delay: pIdx * 0.01 }}
+                                  viewport={{ once: true }}
+                                  className="hover:bg-stone-800/40 transition-colors group/row"
+                                >
+                                  <td className="px-10 py-8">
+                                    <div className="text-stone-500 font-mono text-sm">
+                                      {String(pIdx + 1).padStart(2, '0')}
+                                    </div>
+                                  </td>
+                                  <td className="px-10 py-8">
+                                    <div className="flex flex-col gap-1">
+                                      <div className="flex items-center gap-3">
+                                        <span className="text-2xl text-stone-100 group-hover/row:text-sand transition-colors font-display tracking-tight">
+                                          {player.name}
+                                        </span>
+                                        <div className="opacity-60 group-hover/row:opacity-100 transition-opacity">
+                                          {player.gender === 'Male' ? <Mars size={18} className="text-sky-400" /> : player.gender === 'Female' ? <Venus size={18} className="text-rose-400" /> : <MoreHorizontal size={18} className="text-stone-500" />}
+                                        </div>
+                                      </div>
+                                      <span className="text-stone-500 text-xs uppercase tracking-widest font-mono">
+                                        Sup: {player.supervisorName || '—'}
                                       </span>
-                                      <div className="opacity-60 group-hover/row:opacity-100 transition-opacity">
-                                        {player.gender === 'Male' ? <Mars size={18} className="text-sky-400" /> : player.gender === 'Female' ? <Venus size={18} className="text-rose-400" /> : <MoreHorizontal size={18} className="text-stone-500" />}
+                                    </div>
+                                  </td>
+                                  <td className="px-10 py-8">
+                                    <div className="flex items-center gap-4">
+                                      <div className="w-5 h-5 rounded-full shadow-lg" style={{ backgroundColor: tribe.color }} />
+                                      <span className="text-stone-300 tracking-[0.2em] text-base uppercase font-display">{tribe.name}</span>
+                                    </div>
+                                  </td>
+                                  <td className="px-10 py-8 max-w-sm">
+                                    <p className="font-hand text-xl text-sand/70 leading-tight italic">"{stats.description}"</p>
+                                  </td>
+                                  <td className="px-10 py-8 text-right flex justify-end">
+                                    <div className="flex flex-col gap-3 w-64">
+                                      <div className="flex items-center justify-between text-xs uppercase tracking-tighter text-stone-500">
+                                        <span>STR / AGI / INT</span>
+                                        <span>{Math.round((stats.strength + stats.agility + stats.intel) / 3)} MAX</span>
+                                      </div>
+                                      <div className="flex gap-1 h-2 w-full bg-stone-950 rounded-full overflow-hidden">
+                                        <div title={`Strength: ${stats.strength}`} className="h-full bg-torch-red" style={{ width: `${stats.strength/3}%` }} />
+                                        <div title={`Agility: ${stats.agility}`} className="h-full bg-lagoon" style={{ width: `${stats.agility/3}%` }} />
+                                        <div title={`Intelligence: ${stats.intel}`} className="h-full bg-sky-500" style={{ width: `${stats.intel/3}%` }} />
+                                      </div>
+                                      <div className="flex items-center gap-6 mt-1 justify-end">
+                                        <div className="flex items-center gap-2">
+                                          <div className="w-2 h-2 rounded-full bg-torch-red" />
+                                          <span className="text-[10px] text-stone-500">S:{stats.strength}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <div className="w-2 h-2 rounded-full bg-lagoon" />
+                                          <span className="text-[10px] text-stone-500">A:{stats.agility}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <div className="w-2 h-2 rounded-full bg-sky-500" />
+                                          <span className="text-[10px] text-stone-500">I:{stats.intel}</span>
+                                        </div>
                                       </div>
                                     </div>
-                                    <span className="text-stone-500 text-xs uppercase tracking-widest font-mono">
-                                      Sup: {player.supervisorName || '—'}
-                                    </span>
-                                  </div>
-                                </td>
-                                <td className="px-10 py-8">
-                                  <div className="flex items-center gap-4">
-                                    <div className="w-5 h-5 rounded-full shadow-lg" style={{ backgroundColor: tribe.color }} />
-                                    <span className="text-stone-300 tracking-[0.2em] text-base uppercase font-display">{tribe.name}</span>
-                                  </div>
-                                </td>
-                                <td className="px-10 py-8 max-w-sm">
-                                  <p className="font-hand text-xl text-sand/70 leading-tight italic">"{stats.description}"</p>
-                                </td>
-                                <td className="px-10 py-8 text-right flex justify-end">
-                                  <div className="flex flex-col gap-3 w-64">
-                                    <div className="flex items-center justify-between text-xs uppercase tracking-tighter text-stone-500">
-                                      <span>STR / AGI / INT</span>
-                                      <span>{Math.round((stats.strength + stats.agility + stats.intel) / 3)} MAX</span>
-                                    </div>
-                                    <div className="flex gap-1 h-2 w-full bg-stone-950 rounded-full overflow-hidden">
-                                      <div title={`Strength: ${stats.strength}`} className="h-full bg-torch-red" style={{ width: `${stats.strength/3}%` }} />
-                                      <div title={`Agility: ${stats.agility}`} className="h-full bg-lagoon" style={{ width: `${stats.agility/3}%` }} />
-                                      <div title={`Intelligence: ${stats.intel}`} className="h-full bg-sky-500" style={{ width: `${stats.intel/3}%` }} />
-                                    </div>
-                                    <div className="flex items-center gap-6 mt-1 justify-end">
-                                      <div className="flex items-center gap-2">
-                                        <div className="w-2 h-2 rounded-full bg-torch-red" />
-                                        <span className="text-[10px] text-stone-500">S:{stats.strength}</span>
-                                      </div>
-                                      <div className="flex items-center gap-2">
-                                        <div className="w-2 h-2 rounded-full bg-lagoon" />
-                                        <span className="text-[10px] text-stone-500">A:{stats.agility}</span>
-                                      </div>
-                                      <div className="flex items-center gap-2">
-                                        <div className="w-2 h-2 rounded-full bg-sky-500" />
-                                        <span className="text-[10px] text-stone-500">I:{stats.intel}</span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </td>
-                              </motion.tr>
-                            );
-                          })}
-                      </tbody>
-                    </table>
-                  </div>
+                                  </td>
+                                </motion.tr>
+                              );
+                            })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                 </div>
               </div>
             </motion.div>
