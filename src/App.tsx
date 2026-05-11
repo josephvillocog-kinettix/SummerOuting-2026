@@ -379,7 +379,7 @@ export default function App() {
     setSaveSuccess(false);
     
     try {
-      // Prepare data for Google Sheets: only name, tribe, and supervisor
+      // Prepare data for Google Sheets: name, tribe, supervisor in that order
       const dataToSave = players
         .filter(p => tribes.some(t => t.playerIds.includes(p.id)))
         .map(p => ({
@@ -388,22 +388,28 @@ export default function App() {
           supervisor: p.supervisorName || 'N/A'
         }));
 
-      const response = await fetch("https://script.google.com/macros/s/AKfycbyaLTqpOOj2bNO0coHaLjpHdOdtC6vu1JmSH-Bujiuc3dzdPEJN1k50zoQlaTtqAij5/exec", {
+      console.log('Syncing data to Google Sheets:', dataToSave);
+
+      // Using an object envelope to ensure the script has context
+      const payload = {
+        action: 'saveTribes',
+        timestamp: new Date().toISOString(),
+        rows: dataToSave
+      };
+
+      // Sending via text/plain with no-cors to handle GAS redirection and CORS restrictions
+      await fetch("https://script.google.com/macros/s/AKfycbyaLTqpOOj2bNO0coHaLjpHdOdtC6vu1JmSH-Bujiuc3dzdPEJN1k50zoQlaTtqAij5/exec", {
         method: 'POST',
-        mode: 'no-cors', // Important for Google Apps Script web apps if you don't handle CORS explicitly
+        mode: 'no-cors',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'text/plain',
         },
-        body: JSON.stringify({
-          action: 'saveTribes',
-          timestamp: new Date().toISOString(),
-          data: dataToSave
-        }),
+        body: JSON.stringify(payload),
       });
 
-      // Since we're using no-cors, we won't get a standard response body, 
-      // but if it didn't throw, we assume success for this demo/prototype
-      console.log('Save request sent');
+      // Verification: Since we use no-cors, we can't read the response.
+      // We assume success if the fetch promise resolves without timing out or erroring.
+      console.log('Sync request successfully dispatched to Google Apps Script.');
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (error) {
