@@ -237,7 +237,7 @@ const SPECIAL_REPUTATIONS: Record<string, string> = {
   "Riffy Campo": "The most popular governor in Kinettix. Her campaign platform consists entirely of 'More Coconuts for Everyone' and 'Mandatory Island Siestas'.",
   "Catherine Ballena": "The dancing zumba queen of Kinettix. Can maintain a perfect squat while balance-testing a tribe's strategic alliance.",
   "Kein Negre": "Can summit mount busay by running backwards with one foot. Currently using this skill to retreat from complex social situations and incoming Tribal Councils.",
-  "Klyde Elydom Etang": "His inspiration is from his multiple children. He has mastered the art of lightning-fast reflexes, primarily from years of catching falling juice boxes and dodging airborne LEGO bricks.",
+  "Klyde Elydom Etang": "Once hailed as the sexiest man alive in Mactan Island. He currently balances his legendary charm with the tactical complexity of managing multiple children, which has given him the reflexes of a ninja and the patience of a saint.",
   "Carmel Grace Basalo": "Pickleball pro player, part time accountant. Can calculate your taxes while delivering a 60mph serve. If you see her with a paddle and a ledger, run.",
   "Mary Louise Duaban": "Can perform accounting with her eyes closed and hands tied behind her back. She’s currently auditing the wind to ensure the trade winds are staying within budget.",
   "Crystel Mae Pontino": "Most successful businesswoman in Kinettix. She can turn a handful of sand into a profitable resort chain before the tide even comes in.",
@@ -425,7 +425,21 @@ export default function App() {
   const loadFromGoogleSheets = async (isForRoster: boolean = true) => {
     setIsLoadingRegistry(true);
     try {
-      const response = await fetch("https://script.google.com/macros/s/AKfycbyaLTqpOOj2bNO0coHaLjpHdOdtC6vu1JmSH-Bujiuc3dzdPEJN1k50zoQlaTtqAij5/exec");
+      const url = "https://script.google.com/macros/s/AKfycbyaLTqpOOj2bNO0coHaLjpHdOdtC6vu1JmSH-Bujiuc3dzdPEJN1k50zoQlaTtqAij5/exec";
+      
+      const response = await fetch(url, {
+        method: "GET",
+        mode: "cors",
+        credentials: "omit",
+        headers: {
+          "Accept": "application/json"
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
       
       if (Array.isArray(data)) {
@@ -477,6 +491,10 @@ export default function App() {
       }
     } catch (error) {
       console.error('Error loading from Google Sheets:', error);
+      // If we hit a NetworkError, it might be due to CORS in some browser environments
+      if (error instanceof TypeError && error.message === 'Failed to fetch') {
+        console.warn('NetworkError often points to CORS or connection issues with Google Apps Script.');
+      }
     } finally {
       setIsLoadingRegistry(false);
     }
@@ -918,7 +936,7 @@ export default function App() {
       
       <main className={cn(
         "mx-auto relative z-10 px-6",
-        (currentView === 'teams' || currentView === 'member-roster') ? "max-w-none w-[98%]" : "max-w-7xl"
+        (currentView === 'teams' || currentView === 'member-roster' || currentView === 'compose') ? "max-w-none w-[98%]" : "max-w-7xl"
       )}>
         <AnimatePresence mode="wait">
           {currentView === 'member-roster' && (
@@ -1565,18 +1583,18 @@ export default function App() {
                                  transition={{ delay: 1 + (idx * 0.1), duration: 0.8 }}
                                  className="flex flex-col items-center gap-4 group"
                                >
-                                 <div className="relative p-6 bg-stone-900/60 border-2 border-stone-800 rounded-[2rem] shadow-2xl transition-transform hover:scale-110">
+                                 <div className="relative p-7 bg-stone-900/60 border-2 border-stone-800 rounded-[2.2rem] shadow-2xl transition-transform hover:scale-110">
                                    <div className="absolute inset-0 blur-2xl opacity-10 rounded-full" style={{ backgroundColor: t.color }} />
-                                   <TribeIconComponent icon={t.icon} size={64} style={{ color: t.color }} className="relative z-10" />
+                                   <TribeIconComponent icon={t.icon} size={84} style={{ color: t.color }} className="relative z-10" />
                                    
                                    {/* Decorative Ring */}
-                                   <div className="absolute -inset-2 border-2 border-stone-800/50 rounded-[2.5rem] pointer-events-none" />
+                                   <div className="absolute -inset-2.5 border-2 border-stone-800/50 rounded-[2.8rem] pointer-events-none" />
                                  </div>
                                  <div className="flex flex-col items-center">
-                                   <span className="font-display text-lg text-stone-100 tracking-widest uppercase" style={{ textShadow: `0 0 10px ${t.color}44` }}>
+                                   <span className="font-display text-2xl text-stone-100 tracking-widest uppercase" style={{ textShadow: `0 0 10px ${t.color}44` }}>
                                      {t.name}
                                    </span>
-                                   <div className="w-12 h-1 mt-2 rounded-full" style={{ backgroundColor: t.color }} />
+                                   <div className="w-16 h-1.5 mt-2 rounded-full" style={{ backgroundColor: t.color }} />
                                  </div>
                                </motion.div>
                              ))}
@@ -1888,16 +1906,16 @@ export default function App() {
                              transition={{ delay: 0.6, duration: 1 }}
                              className="hidden lg:block opacity-30 hover:opacity-80 transition-opacity"
                            >
-                              <DetailedTikiMask assetName={tribe.icon} color={tribe.color} scale={1.0} />
+                              <DetailedTikiMask assetName={tribe.icon} color={tribe.color} scale={1.25} />
                            </motion.div>
-
+ 
                            <div className="relative">
                              <div 
                                className="absolute inset-0 blur-[100px] opacity-60 rounded-full" 
                                style={{ backgroundColor: tribe.color }} 
                              />
                              <div className="relative p-12 bg-stone-900 border-8 border-stone-800 rounded-full shadow-[0_0_100px_rgba(0,0,0,0.8)]">
-                                <TribeIconComponent icon={tribe.icon} size={160} style={{ color: tribe.color }} className="drop-shadow-[0_0_30px_rgba(0,0,0,0.8)]" />
+                                <TribeIconComponent icon={tribe.icon} size={200} style={{ color: tribe.color }} className="drop-shadow-[0_0_30px_rgba(0,0,0,0.8)]" />
                              </div>
                              
                              {/* Animated rings */}
@@ -1920,14 +1938,14 @@ export default function App() {
                                />
                              ))}
                            </div>
-
+ 
                            <motion.div
                              initial={{ x: 100, opacity: 0 }}
                              animate={{ x: 0, opacity: 1 }}
                              transition={{ delay: 0.8, duration: 1 }}
                              className="hidden lg:block opacity-30 hover:opacity-80 transition-opacity"
                            >
-                              <DetailedTikiMask assetName={tribe.icon} color={tribe.color} scale={1.0} />
+                              <DetailedTikiMask assetName={tribe.icon} color={tribe.color} scale={1.25} />
                            </motion.div>
                         </motion.div>
                         
@@ -1937,14 +1955,28 @@ export default function App() {
                             animate={{ y: 0, opacity: 1 }}
                             transition={{ delay: 0.4, duration: 1 }}
                           >
-                            <h2 
-                              className="font-display text-9xl md:text-[12rem] text-stone-100 tracking-[0.3em] uppercase drop-shadow-[0_10px_30px_rgba(0,0,0,1)] inline-block"
-                              style={{ 
-                                textShadow: `0 0 40px ${tribe.color}66`
-                              }}
-                            >
-                              {tribe.name}
-                            </h2>
+                            <div className="flex flex-col items-center">
+                               {tribe.name === "Stormbreakers" ? (
+                                  <div className="flex flex-col items-center -space-y-4 md:-space-y-8">
+                                    <h2 className="font-display text-7xl md:text-[8rem] text-stone-100 tracking-[0.3em] uppercase drop-shadow-2xl" style={{ textShadow: `0 0 40px ${tribe.color}66` }}>STORM</h2>
+                                    <h2 className="font-display text-7xl md:text-[8rem] text-stone-100 tracking-[0.3em] uppercase drop-shadow-2xl" style={{ textShadow: `0 0 40px ${tribe.color}66` }}>BREAKERS</h2>
+                                  </div>
+                               ) : tribe.name === "PathFinders" ? (
+                                  <div className="flex flex-col items-center -space-y-4 md:-space-y-8">
+                                     <h2 className="font-display text-7xl md:text-[8rem] text-stone-100 tracking-[0.3em] uppercase drop-shadow-2xl" style={{ textShadow: `0 0 40px ${tribe.color}66` }}>PATH</h2>
+                                     <h2 className="font-display text-7xl md:text-[8rem] text-stone-100 tracking-[0.3em] uppercase drop-shadow-2xl" style={{ textShadow: `0 0 40px ${tribe.color}66` }}>FINDERS</h2>
+                                  </div>
+                               ) : (
+                                 <h2 
+                                   className="font-display text-7xl md:text-[10rem] text-stone-100 tracking-[0.3em] uppercase drop-shadow-[0_10px_30px_rgba(0,0,0,1)] inline-block"
+                                   style={{ 
+                                     textShadow: `0 0 40px ${tribe.color}66`
+                                   }}
+                                 >
+                                   {tribe.name}
+                                 </h2>
+                               )}
+                            </div>
                           </motion.div>
 
                           <motion.div 
@@ -2174,7 +2206,7 @@ export default function App() {
                         }}
                         className={cn(
                           "hawaiian-card flex flex-col group border-4 h-full relative overflow-hidden transition-all duration-300",
-                          !isAllRevealed ? "w-full max-w-4xl min-h-[600px]" : "w-full min-h-[280px] cursor-pointer hover:shadow-2xl hover:-translate-y-1 active:scale-95",
+                          !isAllRevealed ? "w-full max-w-[90rem] min-h-[700px]" : "w-full min-h-[280px] cursor-pointer hover:shadow-2xl hover:-translate-y-1 active:scale-95",
                           isActiveTribe ? "shadow-2xl scale-[1.02]" : "shadow-lg opacity-90"
                         )}
                         style={{ 
@@ -2277,7 +2309,7 @@ export default function App() {
                          </div>
                       </div>
 
-                      <div className="flex-grow p-4 relative z-10">
+                      <div className="flex-grow px-4 pt-1 pb-4 relative z-10">
                          <div className="grid grid-cols-3 gap-2 relative">
                             <AnimatePresence mode="popLayout">
                               {tribe.playerIds.map(id => {
@@ -2312,19 +2344,19 @@ export default function App() {
                                         <div className="flex items-center gap-2">
                                            <span className={cn(
                                              "font-display text-stone-100 tracking-tight leading-none",
-                                             isFinished ? "text-base" : "text-xl"
+                                             isFinished ? "text-base" : "text-3xl"
                                            )}>{player.name}</span>
                                            {player.gender === 'Male' ? (
-                                             <Mars size={isFinished ? 14 : 18} className="text-sky-400" />
+                                             <Mars size={isFinished ? 14 : 26} className="text-sky-400" />
                                            ) : player.gender === 'Female' ? (
-                                             <Venus size={isFinished ? 14 : 18} className="text-rose-400" />
+                                             <Venus size={isFinished ? 14 : 26} className="text-rose-400" />
                                            ) : (
-                                             <MoreHorizontal size={isFinished ? 14 : 18} className="text-stone-400" />
+                                             <MoreHorizontal size={isFinished ? 14 : 26} className="text-stone-400" />
                                            )}
                                         </div>
                                         <span className={cn(
-                                          "font-display text-stone-500 uppercase tracking-[0.2em] mt-1 opacity-80 line-clamp-1",
-                                          isFinished ? "text-[10px]" : "text-xs"
+                                          "font-display text-stone-500 uppercase tracking-[0.2em] mt-2 opacity-80 line-clamp-1",
+                                          isFinished ? "text-[10px]" : "text-sm"
                                         )}>
                                           {player.supervisorName ? `${player.supervisorName}` : player.category}
                                         </span>
@@ -2421,7 +2453,7 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-12">
                 {tribes.map((tribe, tIdx) => (
                   <motion.div 
                     key={tribe.id} 
