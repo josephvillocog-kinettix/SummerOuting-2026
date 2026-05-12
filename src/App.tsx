@@ -224,7 +224,6 @@ const WITTY_DESCRIPTIONS = [
 const SPECIAL_REPUTATIONS: Record<string, string> = {
   "Margaux Kylie Cañete": "Former title holder of Miss Carcar 2024. Currently defending her crown against a highly judgmental group of seagulls.",
   "Margaux Canete": "Former title holder of Miss Carcar 2024. Currently defending her crown against a highly judgmental group of seagulls.",
-  "Marvin Keith Tan": "Richest man in Kinettix. Elon Musk of Cebu. Currently negotiating an acquisition of the Pacific Ocean while optimizing his hydration-to-hustle ratios.",
   "Ariel Tabacolde": "A person who brushes his teeth 10 times a day. Has the brightest smile in the archipelago and can blind opponents during challenges with a single grin.",
   "Jennelyn Oporto": "Recently won the title Little Miss Bacayan 2026. Her strategic brilliance is only matched by her ability to negotiate peace between feuding island monkeys.",
   "WhiteMillen Ponsica": "Can perform accounting using roman numerals in Braille System. Can audit the entire island's coconut inventory while blindfolded and submerged in salt water.",
@@ -242,7 +241,8 @@ const SPECIAL_REPUTATIONS: Record<string, string> = {
   "Mary Louise Duaban": "Can perform accounting with her eyes closed and hands tied behind her back. She’s currently auditing the wind to ensure the trade winds are staying within budget.",
   "Crystel Mae Pontino": "Most successful businesswoman in Kinettix. She can turn a handful of sand into a profitable resort chain before the tide even comes in.",
   "Cecilio Ramirez": "Successful food entrepreneur. He can whip up a five-course gourmet meal using only a rusty spoon, a coconut, and sheer willpower.",
-  "Clarisse Sabdao": "Small but terrible. Don't let her size fool you—she once intimidated a shark just by making eye contact and owns more strategic brilliance than the rest of the island combined."
+  "Clarisse Sabdao": "Small but terrible. Don't let her size fool you—she once intimidated a shark just by making eye contact and owns more strategic brilliance than the rest of the island combined.",
+  "Marvin Keith Tan": "A successful businessman and alien enthusiast. He’s currently trying to negotiate a trade agreement with the Andromeda galaxy while simultaneously cornering the island's market on tinfoil hats."
 };
 
 const getWittyReputation = (name: string, excluded: Set<string>): string => {
@@ -552,7 +552,7 @@ export default function App() {
     if (isPlayMode) {
       interval = setInterval(() => {
         setCurrentPlayIndex(prev => prev + 1);
-      }, 6000);
+      }, 7000);
     }
     return () => clearInterval(interval);
   }, [isPlayMode]);
@@ -936,7 +936,7 @@ export default function App() {
       
       <main className={cn(
         "mx-auto relative z-10 px-6",
-        (currentView === 'teams' || currentView === 'member-roster' || currentView === 'compose') ? "max-w-none w-[98%]" : "max-w-7xl"
+        (currentView === 'teams' || currentView === 'member-roster' || currentView === 'compose' || currentView === 'outplay') ? "max-w-none w-[98%]" : "max-w-7xl"
       )}>
         <AnimatePresence mode="wait">
           {currentView === 'member-roster' && (
@@ -1085,7 +1085,7 @@ export default function App() {
                                     </div>
                                   </td>
                                   <td className="px-10 py-8 max-w-sm">
-                                    <p className="font-hand text-xl text-sand/70 leading-tight italic">"{stats.description}"</p>
+                                    <p className="font-sans text-sm md:text-base text-sand/90 leading-relaxed font-medium">"{stats.description}"</p>
                                   </td>
                                   <td className="px-10 py-8 text-right flex justify-end">
                                     <div className="flex flex-col gap-3 w-64">
@@ -1491,7 +1491,7 @@ export default function App() {
                    </h2>
                    <Flower className="text-hibiscus animate-pulse" size={32} />
                 </div>
-                <p className="font-hand text-2xl text-sand italic">
+                <p className="font-sans text-xl text-sand/80 font-medium tracking-wide">
                   "The spirits of the islands have spoken. May your journey be fruitful."
                 </p>
               </div>
@@ -1987,7 +1987,7 @@ export default function App() {
                           >
                              <div className="h-1 lg:w-48 bg-gradient-to-r from-transparent to-stone-600" />
                              <div className="flex flex-col gap-2">
-                               <span className="font-hand text-5xl text-sand italic tracking-widest drop-shadow-md">The spirits have spoken...</span>
+                               <span className="font-sans text-4xl text-sand tracking-[0.2em] uppercase font-medium drop-shadow-md">The spirits have spoken...</span>
                                <motion.div 
                                  animate={{ opacity: [0.4, 1, 0.4] }}
                                  transition={{ duration: 2, repeat: Infinity }}
@@ -2146,7 +2146,7 @@ export default function App() {
                                </motion.div>
 
                                <div className="mt-12 text-center relative z-20">
-                                  <p className="font-hand text-3xl text-sand/60 italic">The choice is made.</p>
+                                  <p className="font-sans text-2xl text-sand/80 uppercase tracking-widest">The choice is made.</p>
                                   <div className="mt-4 flex justify-center gap-6 opacity-30">
                                      <Flower className="animate-spin-slow text-hibiscus" />
                                      <Waves className="animate-sway text-ocean-blue" />
@@ -2434,7 +2434,7 @@ export default function App() {
                   <h2 className="font-display text-6xl text-stone-100 tracking-widest drop-shadow-2xl">ISLAND SCROLLS</h2>
                   <div className="flex items-center gap-2 mt-2">
                      <Waves className="text-ocean-blue" size={20} />
-                     <span className="font-hand text-2xl text-sand italic">"The rosters are set. The challenge awaits."</span>
+                     <span className="font-sans text-lg text-sand/80 tracking-widest uppercase">"The rosters are set. The challenge awaits."</span>
                   </div>
                 </div>
                 {/* Addition: Assets in Tribes Summary header */}
@@ -2647,7 +2647,7 @@ export default function App() {
                                   </div>
                                 </td>
                                 <td className="px-8 py-6 max-w-xs">
-                                  <p className="font-hand text-lg text-sand/70 leading-tight italic">"{stats.description}"</p>
+                                  <p className="font-sans text-sm text-sand/90 leading-relaxed font-medium">"{stats.description}"</p>
                                 </td>
                                 <td className="px-8 py-6">
                                   <div className="flex flex-col gap-2 w-48">
@@ -2705,7 +2705,7 @@ export default function App() {
                                    key={currentPlayIndex}
                                    initial={{ width: "0%" }}
                                    animate={{ width: "100%" }}
-                                   transition={{ duration: 6, ease: "linear" }}
+                                   transition={{ duration: 7, ease: "linear" }}
                                    className="h-full bg-torch-orange shadow-[0_0_10px_rgba(249,115,22,0.5)]"
                                  />
                                </div>
@@ -2727,10 +2727,10 @@ export default function App() {
                                       ))}
                                    </div>
                                  </div>
-                                 <p className="text-stone-500 font-display text-xs tracking-widest uppercase">Displays updating every 6 seconds</p>
+                                 <p className="text-stone-500 font-display text-xs tracking-widest uppercase">Displays updating every 7 seconds</p>
                                </div>
 
-                               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                                 {displayPlayers.map((player, pIdx) => {
                                   let p = { ...player };
                                   if (p.name === "Riffy Campo") p.gender = 'Female';
@@ -2769,7 +2769,7 @@ export default function App() {
                                           <h4 className="text-4xl font-display text-stone-100 leading-tight group-hover/card:text-torch-orange transition-colors">{p.name}</h4>
 
                                         </div>
-                                        <p className="font-hand text-2xl text-sand leading-relaxed italic animate-in fade-in slide-in-from-left-2 duration-1000 delay-300">
+                                        <p className="font-sans text-lg text-sand/90 leading-relaxed font-medium animate-in fade-in slide-in-from-left-2 duration-1000 delay-300">
                                           "{stats.description}"
                                         </p>
                                       </div>
