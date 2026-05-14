@@ -106,18 +106,18 @@ type RevealEvent =
 
 // --- Constants ---
 const TRIBAL_COLORS = [
-  { name: 'Voyagers', value: '#3ebeb1', icon: 'Asset_1.png' },
-  { name: 'StormBreakers', value: '#ca3729', icon: 'Asset_3.png' },
-  { name: 'Keepers', value: '#d2672e', icon: 'Asset_4.png' },
-  { name: 'Guardians', value: '#d3a12a', icon: 'Asset_5.png' },
-  { name: 'Raiders', value: '#6a4d94', icon: 'Asset_6.png' },
-  { name: 'PathFinders', value: '#6c7e35', icon: 'Asset_7.png' },
+  { name: 'Voyagers', value: '#3ebeb1', icon: 'voyagers.png' },
+  { name: 'StormBreakers', value: '#ca3729', icon: 'stormbreakers.png' },
+  { name: 'Keepers', value: '#d2672e', icon: 'keepers.png' },
+  { name: 'Guardians', value: '#d3a12a', icon: 'guardians.png' },
+  { name: 'Raiders', value: '#6a4d94', icon: 'raiders.png' },
+  { name: 'PathFinders', value: '#6c7e35', icon: 'pathfinders.png' },
 ];
 
 // --- Assets ---
 const TIKI_ASSETS = [
-  "Asset_1.png", "Asset_3.png", "Asset_4.png", "Asset_5.png", 
-  "Asset_6.png", "Asset_7.png", "Asset_8.png", "Asset_9.png", 
+  "voyagers.png", "stormbreakers.png", "keepers.png", "guardians.png", 
+  "raiders.png", "pathfinders.png", "Asset_8.png", "Asset_9.png", 
   "Asset_10.png", "Asset_11.png", "Asset_12.png", "Asset_13.png"
 ];
 
@@ -339,7 +339,7 @@ const DancingTikiLoading = () => {
           >
             <img 
               src={`${import.meta.env.BASE_URL}assets/${tc.icon}`} 
-              className="w-16 h-16 md:w-24 md:h-24 object-contain drop-shadow-[0_0_20px_rgba(255,255,255,0.3)]"
+              className="w-20 h-20 md:w-32 md:h-32 object-contain drop-shadow-[0_0_20px_rgba(255,255,255,0.3)]"
               alt={tc.name}
             />
             <div 
@@ -814,7 +814,7 @@ export default function App() {
   );
 
   const TribeIconComponent = ({ icon, size = 24, className, style }: { icon: string, size?: number, className?: string, style?: any }) => {
-    if (icon && icon.startsWith('Asset')) {
+    if (icon && (icon.startsWith('Asset') || icon.endsWith('.png'))) {
       return (
         <img 
           src={`${import.meta.env.BASE_URL}assets/${icon}`} 
@@ -2524,7 +2524,7 @@ export default function App() {
                         <div className="p-3 flex items-center justify-between border-b border-stone-800 bg-stone-900/60" style={{ borderLeft: `4px solid ${tribe.color}` }}>
                           <div className="flex items-center gap-3">
                             <div className="p-1.5 bg-stone-800/80 rounded-lg shadow-md shrink-0">
-                               <TribeIconComponent icon={tribe.icon} size={18} style={{ color: tribe.color }} />
+                               <TribeIconComponent icon={tribe.icon} size={22} style={{ color: tribe.color }} />
                             </div>
                             <div className="flex flex-col min-w-0">
                               <h3 className="font-display text-lg text-stone-100 tracking-tighter uppercase truncate">{tribe.name}</h3>
@@ -2535,7 +2535,7 @@ export default function App() {
                             </div>
                           </div>
                           <div className="opacity-5 shrink-0">
-                             <DetailedTikiMask color={tribe.color} scale={0.3} />
+                             <DetailedTikiMask color={tribe.color} scale={0.36} />
                           </div>
                         </div>
                         
@@ -2645,7 +2645,11 @@ export default function App() {
                   </button>
                 </div>
 
-                {!isPlayMode ? (
+                {isLoadingRegistry ? (
+                  <div className="hawaiian-card overflow-hidden border-stone-800/40 bg-stone-900/20 backdrop-blur-sm min-h-[400px] flex items-center justify-center">
+                    <DancingTikiLoading />
+                  </div>
+                ) : !isPlayMode ? (
                   <div className="hawaiian-card overflow-hidden border-stone-800/40 bg-stone-900/20 backdrop-blur-sm">
                     <div className="overflow-x-auto custom-scrollbar">
                       <table className="w-full text-left font-display">
