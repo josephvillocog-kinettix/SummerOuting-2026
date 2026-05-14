@@ -1586,7 +1586,7 @@ export default function App() {
                                      <div className="absolute -inset-2 md:-inset-2.5 border-2 border-stone-800/50 rounded-[2.2rem] md:rounded-[2.8rem] pointer-events-none" />
                                    </div>
                                    <div className="flex flex-col items-center">
-                                     <span className="font-display text-2xl md:text-3xl lg:text-4xl text-stone-100 tracking-widest uppercase" style={{ textShadow: `0 0 150px ${t.color}44` }}>
+                                     <span className="font-display text-2xl md:text-3xl lg:text-4xl text-stone-100 tracking-widest uppercase whitespace-nowrap" style={{ textShadow: `0 0 150px ${t.color}44` }}>
                                        {t.name}
                                      </span>
                                      <div className="w-12 md:w-14 lg:w-16 h-1 md:h-1.5 mt-2 rounded-full" style={{ backgroundColor: t.color }} />
@@ -1941,14 +1941,14 @@ export default function App() {
                             animate={{ y: 0, opacity: 1 }}
                             transition={{ delay: 0.4, duration: 1 }}
                           >
-                             <h2 
-                               className="font-display text-[8vw] sm:text-[10vw] md:text-[9rem] lg:text-[14rem] text-stone-100 tracking-[0.3em] uppercase drop-shadow-[0_25px_70px_rgba(0,0,0,1)] whitespace-nowrap inline-block leading-tight"
-                               style={{ 
-                                 textShadow: `0 0 70px ${tribe.color}AA`
-                               }}
-                             >
-                                {tribe.name}
-                             </h2>
+                              <h2 
+                                className="font-display text-[8vw] sm:text-[10vw] md:text-[12vw] lg:text-[14rem] text-stone-100 tracking-[0.3em] uppercase drop-shadow-[0_25px_70px_rgba(0,0,0,1)] whitespace-nowrap block leading-tight text-center w-full"
+                                style={{ 
+                                  textShadow: `0 0 70px ${tribe.color}AA`
+                                }}
+                              >
+                                 {tribe.name}
+                              </h2>
                           </motion.div>
 
                           <motion.div 
@@ -2464,65 +2464,44 @@ export default function App() {
 
               <div ref={tribeContainerRef} className="p-4 rounded-xl">
                 {tribeViewMode === 'cards' ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-12">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-4">
                     {tribes.map((tribe, tIdx) => (
                       <motion.div 
                         key={tribe.id} 
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: tIdx * 0.1 }}
-                        className="relative p-1 bg-[#fef3c7] shadow-[15px_15px_0px_#1c1917] rotate-1 hover:rotate-0 transition-all group"
+                        transition={{ delay: tIdx * 0.03 }}
+                        className="relative p-0.5 bg-[#fef3c7] shadow-[4px_4px_0px_#1c1917] rotate-1 hover:rotate-0 transition-all group"
                       >
                         {/* Paper Texture Overlay */}
                         <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/handmade-paper.png")' }} />
                         
                         {/* Tropical Flower Decoration */}
-                        <div className="absolute -top-6 -right-6 z-20 group-hover:scale-125 transition-transform duration-500">
-                           <Flower className="w-12 h-12 text-hibiscus drop-shadow-lg" />
+                        <div className="absolute -top-2 -right-2 z-20 group-hover:scale-110 transition-transform duration-500">
+                           <Flower className="w-6 h-6 text-hibiscus drop-shadow-sm" />
                         </div>
                         
-                        <div className="bg-transparent p-10 border-4 border-stone-300 relative overflow-hidden">
+                        <div className="bg-transparent p-3 md:p-4 border border-stone-300 relative overflow-hidden">
                           {/* Faded Tribal Pattern */}
                           <div className="absolute inset-0 opacity-5 pointer-events-none polynesian-pattern" />
                           
-                          <div className="border-b-4 border-stone-900 pb-4 mb-8 text-center relative z-10">
-                            <div className="flex items-center justify-center gap-3 mb-2">
-                               <Waves style={{ color: tribe.color }} size={24} />
-                               <h3 className="font-display text-4xl text-stone-900 tracking-tighter uppercase">{tribe.name}</h3>
-                               <Waves style={{ color: tribe.color }} size={24} />
+                          <div className="border-b border-stone-900 pb-1 mb-3 text-center relative z-10">
+                            <div className="flex items-center justify-center gap-1.5 mb-0.5">
+                               <Waves style={{ color: tribe.color }} size={12} />
+                               <h3 className="font-display text-sm md:text-base text-stone-900 tracking-tighter uppercase truncate font-bold">{tribe.name}</h3>
+                               <Waves style={{ color: tribe.color }} size={12} />
                             </div>
                           </div>
                           
-                          <ul className="space-y-6 relative z-10 px-2">
+                          <ul className="space-y-1 relative z-10">
                             {tribe.playerIds.map((id, index) => {
                               const player = players.find(p => p.id === id);
                               return (
-                                <li key={id} className="flex items-center gap-5 border-b-2 border-stone-400/30 pb-3 h-16 group/item">
-                                  <span className="font-display text-stone-400 text-2xl self-start mt-1 group-hover/item:text-stone-900 transition-colors">{(index + 1).toString().padStart(2, '0')}</span>
-                                  <div className="flex flex-col flex-grow">
-                                    <div className="flex items-center gap-3">
-                                      <span className="font-display text-2xl text-stone-900 tracking-tight leading-none">{player?.name}</span>
-                                    </div>
-                                    <div className="flex flex-col gap-1 mt-2">
-                                      <div className="flex items-center gap-3">
-                                        <div className="flex items-center gap-1 opacity-70">
-                                          {player?.gender === 'Male' ? (
-                                            <Mars size={14} className="text-ocean-blue" />
-                                          ) : player?.gender === 'Female' ? (
-                                            <Venus size={14} className="text-hibiscus" />
-                                          ) : (
-                                            <MoreHorizontal size={14} className="text-stone-500" />
-                                          )}
-                                          <span className="font-display text-[10px] text-stone-600 uppercase tracking-widest">{player?.gender}</span>
-                                        </div>
-                                        <div className="w-1 h-1 rounded-full bg-stone-300" />
-                                        <div className="flex items-center gap-1.5 opacity-70">
-                                          <Shield size={12} className="text-stone-400" />
-                                          <span className="font-display text-[10px] text-stone-600 uppercase tracking-widest">
-                                            Sup: {player?.supervisorName || player?.category || 'None'}
-                                          </span>
-                                        </div>
-                                      </div>
+                                <li key={id} className="flex items-center gap-2 border-b border-stone-400/10 pb-1 group/item last:border-0">
+                                  <span className="font-display text-stone-400 text-[10px] w-4 text-right group-hover/item:text-stone-900 transition-colors">{(index + 1).toString().padStart(2, '0')}</span>
+                                  <div className="flex flex-col flex-grow min-w-0">
+                                    <div className="flex items-center">
+                                      <span className="font-display text-xs md:text-sm text-stone-900 tracking-tight leading-tight truncate">{player?.name}</span>
                                     </div>
                                   </div>
                                 </li>
@@ -2531,77 +2510,54 @@ export default function App() {
                           </ul>
                           
                           {/* Bottom Decoration */}
-                          <div className="mt-10 flex justify-center opacity-30">
-                             <TribeIconComponent icon={tribe.icon} size={32} className="text-stone-900" />
+                          <div className="mt-2 flex justify-center opacity-20">
+                             <TribeIconComponent icon={tribe.icon} size={14} className="text-stone-900" />
                           </div>
                         </div>
                       </motion.div>
                     ))}
                   </div>
                 ) : (
-                  <div className="space-y-16">
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                     {tribes.map((tribe) => (
-                      <div key={tribe.id} className="bg-stone-900/40 border-2 border-stone-800 rounded-3xl overflow-hidden backdrop-blur-xl">
-                        <div className="p-8 flex items-center justify-between border-b-2 border-stone-800" style={{ borderLeft: `8px solid ${tribe.color}` }}>
-                          <div className="flex items-center gap-6">
-                            <div className="p-4 bg-stone-800/80 rounded-2xl shadow-xl">
-                               <TribeIconComponent icon={tribe.icon} size={48} style={{ color: tribe.color }} />
+                      <div key={tribe.id} className="bg-stone-900/40 border border-stone-800 rounded-xl overflow-hidden backdrop-blur-md flex flex-col h-full">
+                        <div className="p-3 flex items-center justify-between border-b border-stone-800 bg-stone-900/60" style={{ borderLeft: `4px solid ${tribe.color}` }}>
+                          <div className="flex items-center gap-3">
+                            <div className="p-1.5 bg-stone-800/80 rounded-lg shadow-md shrink-0">
+                               <TribeIconComponent icon={tribe.icon} size={18} style={{ color: tribe.color }} />
                             </div>
-                            <div className="flex flex-col">
-                              <h3 className="font-display text-5xl text-stone-100 tracking-tighter uppercase">{tribe.name}</h3>
-                              <div className="flex items-center gap-3 mt-1">
-                                <Users size={16} className="text-stone-500" />
-                                <span className="font-display text-sm text-stone-400 tracking-widest uppercase">{tribe.playerIds.length} Warriors Registered</span>
+                            <div className="flex flex-col min-w-0">
+                              <h3 className="font-display text-lg text-stone-100 tracking-tighter uppercase truncate">{tribe.name}</h3>
+                              <div className="flex items-center gap-1.5 mt-0.5">
+                                <Users size={10} className="text-stone-500" />
+                                <span className="font-display text-[9px] text-stone-400 tracking-widest uppercase">{tribe.playerIds.length} Warriors</span>
                               </div>
                             </div>
                           </div>
-                          <div className="opacity-10">
-                             <DetailedTikiMask color={tribe.color} scale={0.6} />
+                          <div className="opacity-5 shrink-0">
+                             <DetailedTikiMask color={tribe.color} scale={0.3} />
                           </div>
                         </div>
                         
-                        <div className="overflow-x-auto">
+                        <div>
                           <table className="w-full border-collapse">
                             <thead>
-                              <tr className="bg-stone-900/60 text-left">
-                                <th className="px-10 py-5 font-display text-xs text-stone-500 uppercase tracking-[0.3em] border-b border-stone-800">No.</th>
-                                <th className="px-10 py-5 font-display text-xs text-stone-500 uppercase tracking-[0.3em] border-b border-stone-800">Warrior Name</th>
-                                <th className="px-10 py-5 font-display text-xs text-stone-500 uppercase tracking-[0.3em] border-b border-stone-800">Identity</th>
-                                <th className="px-10 py-5 font-display text-xs text-stone-500 uppercase tracking-[0.3em] border-b border-stone-800">Command / Supervision</th>
+                              <tr className="bg-stone-900/40 text-left">
+                                <th className="px-4 py-1.5 font-display text-[9px] text-stone-500 uppercase tracking-[0.2em] border-b border-stone-800 w-12">No.</th>
+                                <th className="px-4 py-1.5 font-display text-[9px] text-stone-500 uppercase tracking-[0.2em] border-b border-stone-800">Warrior Name</th>
                               </tr>
                             </thead>
-                            <tbody className="divide-y divide-stone-800/50">
+                            <tbody className="divide-y divide-stone-800/20">
                               {tribe.playerIds.map((id, index) => {
                                 const player = players.find(p => p.id === id);
                                 return (
-                                  <tr key={id} className="hover:bg-stone-800/30 transition-colors group">
-                                    <td className="px-10 py-6 font-display text-xl text-stone-500 group-hover:text-stone-300">
+                                  <tr key={id} className="hover:bg-stone-800/20 transition-colors group">
+                                    <td className="px-4 py-1.5 font-display text-xs text-stone-600 group-hover:text-stone-300">
                                       {(index + 1).toString().padStart(2, '0')}
                                     </td>
-                                    <td className="px-10 py-6">
-                                      <span className="font-display text-2xl text-stone-100 group-hover:text-hibiscus transition-colors">{player?.name}</span>
+                                    <td className="px-4 py-1.5">
+                                      <span className="font-display text-sm text-stone-100 group-hover:text-hibiscus transition-colors truncate block">{player?.name}</span>
                                     </td>
-                                    <td className="px-10 py-6">
-                                      <div className="flex items-center gap-3">
-                                        {player?.gender === 'Male' ? (
-                                          <Mars size={18} className="text-ocean-blue" />
-                                        ) : player?.gender === 'Female' ? (
-                                          <Venus size={18} className="text-hibiscus" />
-                                        ) : (
-                                          <MoreHorizontal size={18} className="text-stone-500" />
-                                        )}
-                                        <span className="font-display text-sm text-stone-400 uppercase tracking-widest">{player?.gender}</span>
-                                      </div>
-                                    </td>
-                                    <td className="px-10 py-6">
-                                      <div className="flex items-center gap-3">
-                                        <Shield size={16} className="text-stone-600" />
-                                        <span className="font-display text-sm text-stone-400 tracking-wider">
-                                          {player?.supervisorName || player?.category || 'None'}
-                                        </span>
-                                      </div>
-                                    </td>
-
                                   </tr>
                                 );
                               })}
